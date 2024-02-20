@@ -10,5 +10,7 @@ if (Path.Exists(pathToSourceCode) == false)
 }
 
 using var sourceFile = File.OpenRead(pathToSourceCode);
-var lexer = new Lexer(sourceFile);
-var tokensStream = lexer.Analyze();
+var tokensStream = Lexer.Analyze(sourceFile);
+
+foreach (var token in tokensStream)
+    Console.WriteLine(token);

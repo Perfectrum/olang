@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 using ObjectLanguage.Compiler.Lexer.Tokens;
 
 namespace ObjectLanguage.Compiler.Lexer;
 
-public class Lexer
+public static class Lexer
 {
     private static readonly ReadOnlyDictionary<string, KeywordType> _keywordTypes = new Dictionary<string, KeywordType>
     {
@@ -23,13 +24,54 @@ public class Lexer
         ["then"] = KeywordType.Then,
         ["else"] = KeywordType.Else,
     }.AsReadOnly();
-    
-    private readonly Stream _sourceFile;
 
-    public Lexer(Stream sourceFile) => _sourceFile = sourceFile;
-
-    public IEnumerable<BaseToken> Analyze()
+    // TODO: сделать точки + двоеточия
+    public static IEnumerable<BaseToken> Analyze(Stream sourceFile)
     {
-        yield break;
+        StringBuilder wordBuffer = new();
+        int lineNumber = 0;
+        int indexOnLine = 0;
+        
+        TextReader reader = new StreamReader(sourceFile);
+        for (int readFromBuffer = reader.Read();
+             readFromBuffer != -1;
+             readFromBuffer = reader.Read(), ++indexOnLine)
+        {
+            char currentChar = (char)readFromBuffer;
+
+            // TODO: не очень красиво, но умнее нужно думать
+            var indexOfInNewLine = Environment.NewLine.IndexOf(currentChar);
+            if (indexOfInNewLine != -1)
+            {
+                if (indexOfInNewLine == Environment.NewLine.Length - 1)
+                    ++lineNumber;
+                indexOnLine = 0;
+                continue;
+            }
+
+            if (currentChar != ' ')
+            {
+                wordBuffer.Append(currentChar);
+                continue;
+            }
+            
+            if (wordBuffer.Length == 0)
+                continue;
+
+            var word = wordBuffer.ToString();
+            var span = new Span(lineNumber, indexOnLine - word.Length, indexOnLine);
+            
+            if (_keywordTypes.TryGetValue(word, out KeywordType keywordType))
+                yield return new Keyword(keywordType, span);
+            else if (int.TryParse(word, out var intNumber))
+                yield return new Integer(intNumber, span);
+            // TODO: наверняка не учёл культуру
+            else if (double.TryParse(word, out var doubleNumber))
+                yield return new Real(doubleNumber, span);
+            else
+                yield return new Identifier(word, span);
+            
+            wordBuffer.Clear();
+        }
     }
 }

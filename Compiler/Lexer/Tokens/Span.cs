@@ -1,7 +1,7 @@
 ﻿namespace ObjectLanguage.Compiler.Lexer.Tokens;
 
 public record struct Span(
-    long Line,
+    long LineNumber,
     int BeginPosition,
     int EndPosition
 );

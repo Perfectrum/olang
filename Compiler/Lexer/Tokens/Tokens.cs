@@ -4,11 +4,11 @@ public abstract record BaseToken(Span Span);
 
 public record Identifier(string Name, Span Span) : BaseToken(Span);
 
-public record Integer(string Name, Span Span) : BaseToken(Span);
+public record Integer(int Value, Span Span) : BaseToken(Span);
 
 public record Real(double Value, Span Span) : BaseToken(Span);
 
-public record Keyword(KeywordType Type);
+public record Keyword(KeywordType Type, Span Span) : BaseToken(Span);
 
 public enum KeywordType
 {

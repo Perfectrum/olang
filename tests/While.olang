@@ -1,0 +1,12 @@
+﻿class Program is
+    while false loop
+        return
+    end
+    
+    var i : 0
+    while i.Less(10) loop
+        if i.GreaterEqual(10) then return end
+        
+        i := i.Plus(1)
+    end
+end

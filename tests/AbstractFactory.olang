@@ -1,0 +1,93 @@
+﻿class Widget is
+    this() is end
+    
+    method Render() : Integer is
+        return 0
+    end
+end
+
+class WindowsButton extends Widget is
+    this() is end
+    
+    method Render() : Integer is
+        return 1
+    end
+end
+
+class WindowsTextField extends Widget is
+    this() is end
+    
+    method Render() : Integer is
+        return 2
+    end
+end
+
+class AndroidButton extends Widget is
+    this() is end
+    
+    method Render() : Integer is
+        return -1
+    end
+end
+
+class AndroidTextField extends Widget is
+    this() is end
+    
+    method Render() : Integer is
+        return -2
+    end
+end
+
+class WidgetFactory is
+    this() is end
+    
+    method CreateButton() : Widget is
+        return Widget()
+    end
+    
+    method CreateTextField() : Widget is
+        return Widget()
+    end
+end
+
+class WindowsWidgetFactory extends WidgetFactory is
+    this() is end
+    
+    method CreateButton() : Widget is
+        return WindowsButton()
+    end
+    
+    method CreateTextField() : Widget is
+        return WindowsTextField()
+    end
+end
+
+class AndroidWidgetFactory extends WidgetFactory is
+    this() is end
+    
+    method CreateButton() : Widget is
+        return AndroidButton()
+    end
+    
+    method CreateTextField() : Widget is
+        return AndroidTextField()
+    end
+end
+
+class Program is
+    this() is
+        var windowsFactory = WindowsWidgetFactory()
+        var androidFactory = AndroidWidgetFactory()
+        
+        if this.CheckFactory(windowsFactory, 1).And(this.CheckFactory(androidFactory, -1)).Not() then
+            return
+        end
+    end
+    
+    method CheckFactory(factory : WidgetFactory, expectedSign : Integer) : Boolean is
+        var resultButton : factory.CreateButton().Render()
+        var resultTextField : factory.CreateButton().Render()
+        
+        return resultButton.Mult(expectedSign).Equal(1).And(resultTextField.Mult(expectedSign).Equal(2))
+    end
+end

@@ -7,17 +7,11 @@
         array.Set(3, 5.05)
         array.Set(4, 5.07)
         
-        if this.BinarySearch(array, 3.6).Equal(2).Not() then
-            return
-        end
+        if this.BinarySearch(array, 3.6).Equal(2).Not() then return end
             
-        if this.BinarySearch(array, 1).Equal(-1).Not() then
-            return
-        end
+        if this.BinarySearch(array, 1).Equal(-1).Not() then return end
         
-        if this.BinarySearch(array, 5.06).Equal(-1).Not() then
-            return
-        end
+        if this.BinarySearch(array, 5.06).Equal(-1).Not() then return end
     end
     
     method BinarySearch(array : Array[Real], target : Real) : Integer is

@@ -1,0 +1,11 @@
+﻿class Program is
+    this() is
+        if true then
+            if true.Not() then return end
+            
+            if false then return end
+        else
+            return
+        end
+    end
+end

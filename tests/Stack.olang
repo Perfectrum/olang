@@ -39,17 +39,11 @@ class Program is
         while i.Less(v) loop
             var expectedElement : array.Get(i)
             
-            if stack.Peek().Equal(expectedElement).Not() then
-                return
-            end
+            if stack.Peek().Equal(expectedElement).Not() then return end
             
-            if stack.Pop().Equal(expectedElement).Not() then
-                return
-            end
+            if stack.Pop().Equal(expectedElement).Not() then return end
             
-            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then
-                return
-            end
+            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then return end
             
             i := i.Plus(1)
         end

@@ -1,0 +1,43 @@
+﻿class Program is
+    this() is
+        var array : Array[Real](5)
+        array.Set(0, 1.5)
+        array.Set(1, 2.3)
+        array.Set(2, 3.6)
+        array.Set(3, 5.05)
+        array.Set(4, 5.07)
+        
+        if this.BinarySearch(array, 3.6).Equal(2).Not() then
+            return
+        end
+            
+        if this.BinarySearch(array, 1).Equal(-1).Not() then
+            return
+        end
+        
+        if this.BinarySearch(array, 5.06).Equal(-1).Not() then
+            return
+        end
+    end
+    
+    method BinarySearch(array : Array[Real], target : Real) : Integer is
+        var left : 0
+        var right : array.Length - 1
+        
+        while (left.LessEqual(right)) loop
+            var mid = left.Plus(right.Minus(left).Div(2));
+            
+            if array.Get(mid).Equal(target) then
+                return mid
+            end
+            
+            if array.Get(mid).Less(target) then
+                left := mid.Plus(1)
+            else
+                right := mid.Minus(1)
+            end
+        end
+        
+        return -1
+    end
+end

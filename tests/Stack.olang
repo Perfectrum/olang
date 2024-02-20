@@ -1,0 +1,57 @@
+﻿class Stack is
+    var size : 0
+    var list : List[Integer]()
+    
+    this() is end
+    
+    method Push(element : Integer) is
+        list := list.Append(element)
+        size.Plus(1)
+    end
+    
+    method Pop() : Integer is
+        size.Minus(1)
+        var element : list.head()
+        list := list.head()
+        return element
+    end
+    
+    method Peek() : Integer is
+        return list.head()
+    end
+end
+
+class Program is
+    this() is
+        var array = Array[Integer]()
+        array.Set(0, 3)
+        array.Set(1, 1)
+        array.Set(2, 2)
+    
+        var stack = Stack()
+        var i : 0
+        while i.Less(v) loop
+            stack.Push(array.Get(i))
+            i := i.Plus(1)
+        end
+        
+        i := 0
+        while i.Less(v) loop
+            var expectedElement : array.Get(i)
+            
+            if stack.Peek().Equal(expectedElement).Not() then
+                return
+            end
+            
+            if stack.Pop().Equal(expectedElement).Not() then
+                return
+            end
+            
+            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then
+                return
+            end
+            
+            i := i.Plus(1)
+        end
+    end
+end

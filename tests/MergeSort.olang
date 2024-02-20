@@ -1,0 +1,101 @@
+﻿class Random is
+	var a : 45
+	var c : 21
+	var m : 67
+	var seed : 2
+
+	this(startSeed : Integer) is
+		this.seed := startSeed
+	end
+
+    method Next : Integer is
+		this.seed := (this.a * this.seed + this.c) % this.m
+		return this.seed
+	end
+	
+	method FillRandomNumbers(array : Array[Integer]) is
+        var i : 0
+        while i.Less(array.Length) loop
+            array.Set(i, random.Next())
+            i := i.Plus(1)
+        end
+	end
+end
+
+class Program is
+	this(seed : Integer) is
+		var array : Array[Integer](10)
+		var random : Random(seed)
+		random.FillRandomNumbers(array)
+
+		this.Sort(array)
+		
+		if this.CheckSorting(array) then
+		    return
+		end
+	end
+	
+    method Sort(array : Array[Integer]) is
+        Sort(array, 0, array.Length)
+    end
+	
+	method Sort(array : Array[Integer], lowIndex : Integer, highIndex : Integer) is
+	    if highIndex > lowIndex then
+	        var midIndex = highIndex.Plus(lowIndex).Div(2)
+	        this.Sort(array, lowIndex, midIndex)
+	        this.Sort(array, midIndex.Plus(1), highIndex)
+	        this.Merge(array, lowIndex, midIndex, highIndex)
+	    end
+	end
+	
+	method Merge(array : Array[Integer], lowIndex : Integer, midIndex : Integer, highIndex : Integer) is
+	    var left : lowIndex
+	    var right : midIndex + 1
+	    var tempArray = Array[Integer](highIndex - lowIndex + 1)
+	    var index : 0
+	    
+	    while left.LessEqual(midIndex).And(right.LessEqual(highIndex)) loop
+	        if array.Get(left).Less(array.Get(right)) then
+	            tempArray.Set(index, array.Get(left))
+	            left := left.Plus(1)
+            else
+                tempArray.Set(index, array.Get(right))
+                right := right.Plus(1)
+	        end
+	        
+	        index := index.Plus(1)
+	    end
+	    
+	    var tempIndex : left
+	    while tempIndex.LessEqual(midIndex) loop
+	        tempArray.Set(index, array.Get(tempIndex)) 
+	        tempIndex := tempIndex.Plus(1)
+	        index := index.Plus(1)
+	    end
+	    
+	    tempIndex := right
+        while tempIndex.LessEqual(highIndex) loop
+            tempArray.Set(index, array.Get(tempIndex)) 
+            tempIndex := tempIndex.Plus(1)
+            index := index.Plus(1)
+        end
+        
+        tempIndex := 0
+        while tempIndex.Less(array.Length) loop
+            array.Set(lowIndex + tempIndex, tempArray.Get(tempIndex)) 
+            tempIndex := tempIndex.Plus(1)
+        end
+	end
+
+	method CheckSorting(array : Array[Integer]) : Boolean is
+        var i : 1
+        while i.Less(array.Length) loop
+            if array.Get(i - 1).Greater(array.Get(i)) then
+                return false
+            end
+            i := i.Plus(1)
+        end
+        
+        return true
+	end
+end

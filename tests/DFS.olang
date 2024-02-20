@@ -1,0 +1,82 @@
+﻿class Vertex is
+    var neighbours : List[Integer]
+    
+    this() is end
+    
+    method AddEdge(to : Integer) is
+        this.neighbours := this.neighbours.Append(to)
+    end
+end
+
+class Graph is
+    var vertices : 0
+    var adjacencyList : Array[Vertex](0)
+    
+    this(v : Integer) is
+        this.vertices := v
+        this.adjacencyList = Array[Vertex](v)
+        var i : 0
+        while i.Less(v) loop
+            this.adjacencyList.Set(i, Vertex())
+            i := i.Plus(1)
+        end
+    end
+    
+    method AddEdge(from : Integer, to : Integer) is
+        this.adjacencyList.Get(from).AddEdge(to)
+    end
+    
+    method SetWeight(vertex : Integer, weight : Integer) is
+        this.adjacencyList.Get(vertex).SetWeight(weight)
+    end
+    
+    method DFS(startVertex : Integer) : Array[Boolean] is
+        var visited : Array[Boolean](this.vertices)
+        this.DFSInternal(startVertex, visited)
+        return visited
+    end
+    
+    method DFSInternal(from : Integer, visited : Array[Boolean]) is
+        visited.Set(from, true)
+        
+        var neighbours : this.adjacencyList.Get(from)
+        var to : neighbours.Head()
+        while to.IsNotNull() loop
+            if visited.Get(to).Not() then
+                this.DFSInternal(to, visited)
+            end
+            neighbours := neighbours.Tail()
+            to := neighbours.Head()
+        end
+    end
+end
+
+class Program is
+    this() is
+        var vertices : 4
+    
+        var graph = Graph(vertices)
+        graph.AddEdge(0, 1)
+        graph.AddEdge(0, 2)
+        graph.AddEdge(1, 3)
+        graph.AddEdge(3, 2)
+        graph.AddEdge(2, 3)
+        graph.AddEdge(3, 1)
+        
+        var expectedResult = Array[Boolean](vertices)
+        expectedResult.Set(1, true)
+        expectedResult.Set(2, true)
+        expectedResult.Set(3, true)
+        
+        var dfsResult : graph.DFS(1)
+        var i : 0
+        while i.Less(expectedResult.Length) loop
+            if dfsResult.Get(i).And(expectedResult.Get(i)).Not() then
+                return
+            end
+            
+            dfsResult := dfsResult.Tail()
+            i := i.Plus(1)
+        end
+    end
+end

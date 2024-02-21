@@ -40,6 +40,7 @@ class Lexer2
     }
 
     private record Location(int Column, int Line, int Offset);
+    private record struct SwitchParameters(Mode Mode, bool Delay = true, bool Push = true);
 
     ///////////////////////////////////////////////////////////
     // Fields
@@ -62,14 +63,12 @@ class Lexer2
 
     private Span CurrentSpan => new(_line, _column, _column + 1);
 
-    private void Switch(Mode mode, bool delay = true, bool push = true)
+    private void Switch(SwitchParameters parameters)
     {
-        _mode = mode;
-        _delayCurrentSymbol = delay;
-        if (push)
-        {
+        _mode = parameters.Mode;
+        _delayCurrentSymbol = parameters.Delay;
+        if (parameters.Push)
             _locations.Push(new Location(_column, _line, _offset));
-        }
     }
 
     private void Yield(Token token)
@@ -110,35 +109,17 @@ class Lexer2
     ///////////////////////////////////////////////////////////
     // Char helpers
 
-    private bool IsCurrentNewLine()
-    {
-        return Current == '\n';
-    }
+    private bool IsCurrentNewLine() => Current == '\n';
 
-    private bool IsCurrentDigit()
-    {
-        return char.IsDigit(Current);
-    }
+    private bool IsCurrentDigit() => char.IsDigit(Current);
 
-    private bool IsCurrentLetter()
-    {
-        return char.IsLetter(Current);
-    }
+    private bool IsCurrentLetter() => char.IsLetter(Current);
 
-    private bool IsCurrentAlphaNum()
-    {
-        return IsCurrentDigit() || IsCurrentLetter();
-    }
+    private bool IsCurrentAlphaNum() => IsCurrentDigit() || IsCurrentLetter();
 
-    private bool IsCurrentSaveIdentFirstLetter()
-    {
-        return IsCurrentLetter() || Current == '_';
-    }
+    private bool IsCurrentSaveIdentFirstLetter() => IsCurrentLetter() || Current == '_';
 
-    private bool IsCurrentSaveIdentLetter()
-    {
-        return IsCurrentAlphaNum() || Current == '_';
-    }
+    private bool IsCurrentSaveIdentLetter() => IsCurrentAlphaNum() || Current == '_';
 
     ///////////////////////////////////////////////////////////
     // EntryPoint
@@ -166,132 +147,80 @@ class Lexer2
             }
             _delayCurrentSymbol = false;
 
-            switch (_mode)
+            var switchParameters = _mode switch
             {
-                case Mode.BASIC:
-                    BasicCase();
-                    break;
-                case Mode.INTEGER:
-                    IntegerCase();
-                    break;
-                case Mode.DOT:
-                    DotCase();
-                    break;
-                case Mode.REAL:
-                    RealCase();
-                    break;
-                case Mode.STRING:
-                    StringCase();
-                    break;
-                case Mode.WORD:
-                    WordCase();
-                    break;
-            }
+                Mode.BASIC => BasicCase(),
+                Mode.INTEGER => IntegerCase(),
+                Mode.REAL => DotCase(),
+                Mode.DOT => RealCase(),
+                Mode.STRING => StringCase(),
+                Mode.WORD => WordCase(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            if (switchParameters.HasValue)
+                Switch(switchParameters.Value);
         }
 
         End();
         while (_shouldBeYielded.Count > 0)
-        {
             yield return _shouldBeYielded.Dequeue();
-        }
     }
 
     ///////////////////////////////////////////////////////////
     // Actions
 
-    private void BasicCase()
+    private SwitchParameters? BasicCase()
     {
         if (IsCurrentNewLine())
         {
             NewLine();
-            return;
+            return null;
         }
 
+        SwitchParameters? mode = null;
         if (IsCurrentDigit())
-        {
-            Switch(Mode.INTEGER);
-            return;
-        }
-        if (IsCurrentSaveIdentFirstLetter())
-        {
-            Switch(Mode.WORD);
-            return;
-        }
+            mode = new SwitchParameters(Mode.INTEGER);
+        else if (IsCurrentSaveIdentFirstLetter())
+            mode = new SwitchParameters(Mode.WORD);
+        else if (Current == '"')
+            mode = new SwitchParameters(Mode.STRING, false);
 
-        if (Current == '"')
-        {
-            Switch(Mode.STRING, false);
-            return;
-        }
+        if (mode.HasValue)
+            return mode;
 
-        if (Current == ',')
+        SymbolType? symbolType = Current switch
         {
-            Yield(new Symbol(Current.ToString(), SymbolType.Comma, CurrentSpan));
-            return;
-        }
+            ',' => SymbolType.Comma,
+            '.' => SymbolType.Dot,
+            ';' => SymbolType.Semicolon,
+            ':' => SymbolType.Colon,
+            '(' => SymbolType.LP,
+            ')' => SymbolType.RP,
+            '[' => SymbolType.LB,
+            ']' => SymbolType.RB,
+            '=' => SymbolType.Asan,
+            _ => null
+        };
 
-        if (Current == '.')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.Dot, CurrentSpan));
-            return;
-        }
+        if (symbolType.HasValue)
+            Yield(new Symbol(Current.ToString(), symbolType.Value, CurrentSpan));
 
-        if (Current == ';')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.Semicolon, CurrentSpan));
-            return;
-        }
-
-        if (Current == ':')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.Colon, CurrentSpan));
-            return;
-        }
-
-        if (Current == '(')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.LP, CurrentSpan));
-            return;
-        }
-
-        if (Current == ')')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.RP, CurrentSpan));
-            return;
-        }
-
-        if (Current == '[')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.LB, CurrentSpan));
-            return;
-        }
-
-        if (Current == ']')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.RB, CurrentSpan));
-            return;
-        }
-
-        if (Current == '=')
-        {
-            Yield(new Symbol(Current.ToString(), SymbolType.Asan, CurrentSpan));
-            return;
-        }
+        return null;
     }
 
-    private void IntegerCase()
+    private SwitchParameters? IntegerCase()
     {
         if (IsCurrentDigit())
         {
             Store();
-            return;
+            return null;
         }
 
         if (Current == '.')
         {
             Store();
-            Switch(Mode.DOT, false, false);
-            return;
+            return new SwitchParameters(Mode.DOT, false, false);
         }
 
         var word = GetSavedWord();
@@ -299,16 +228,13 @@ class Lexer2
         var number = int.Parse(word);
 
         Yield(new Integer(number, GetSpan()));
-        Switch(Mode.BASIC);
+        return new SwitchParameters(Mode.BASIC);
     }
 
-    private void DotCase()
+    private SwitchParameters? DotCase()
     {
         if (IsCurrentDigit())
-        {
-            Switch(Mode.REAL, true, false);
-            return;
-        }
+            return new SwitchParameters(Mode.REAL, true, false);
 
         var word = GetSavedWord();
         var number = int.Parse(word[..^1]);
@@ -320,91 +246,86 @@ class Lexer2
         dotSpan.EndPosition -= 1;
 
         Yield(new Symbol(".", SymbolType.Dot, dotSpan));
-        Switch(Mode.BASIC);
+        return new SwitchParameters(Mode.BASIC);
     }
 
-    private void RealCase()
+    private SwitchParameters? RealCase()
     {
         if (IsCurrentDigit())
         {
             Store();
-            return;
+            return null;
         }
 
         var word = GetSavedWord();
         var number = double.Parse(word);
 
         Yield(new Real(number, GetSpan()));
-        Switch(Mode.BASIC);
+        return new SwitchParameters(Mode.BASIC);
     }
 
-    private void StringCase()
+    private SwitchParameters? StringCase()
     {
-        if (Current == '\n')
+        if (IsCurrentNewLine())
         {
             //TODO: можно ошибку выкидывать в теории
             NewLine();
             Store();
-            return;
+            return null;
         }
+
         if (Current == '"')
         {
             Yield(new StringLiteral(GetSavedWord(), GetSpan()));
-            Switch(Mode.BASIC, false);
-            return;
+            return new SwitchParameters(Mode.BASIC, false);
         }
 
         Store();
+        return null;
     }
 
-    private void YieldWord()
+    private SwitchParameters? YieldWord()
     {
         var word = GetSavedWord();
         if (word.Length > 0)
         {
             if (_keywordTypes.TryGetValue(word, out var type))
-            {
                 Yield(new Keyword(type, GetSpan()));
-            }
             else
-            {
                 Yield(new Identifier(word, GetSpan()));
-            }
         }
-        Switch(Mode.BASIC);
+
+        return new SwitchParameters(Mode.BASIC);
     }
 
-    private void WordCase()
+    private SwitchParameters? WordCase()
     {
         if (IsCurrentSaveIdentLetter())
         {
             Store();
-            return;
+            return null;
         }
 
-        YieldWord();
+        return YieldWord();
     }
 
     private void End()
     {
         var word = GetSavedWord();
-        if (word.Length > 0)
+        if (word.Length == 0)
+            return;
+
+        switch (_mode)
         {
-            if (_mode == Mode.INTEGER)
-            {
+            case Mode.INTEGER:
                 Yield(new Integer(int.Parse(word), GetSpan()));
                 return;
-            }
-            if (_mode == Mode.REAL)
-            {
+            case Mode.REAL:
                 Yield(new Real(double.Parse(word), GetSpan()));
-            }
-
-            if (_mode == Mode.WORD)
-            {
+                break;
+            case Mode.WORD:
                 YieldWord();
-            }
+                break;
         }
     }
-
 }

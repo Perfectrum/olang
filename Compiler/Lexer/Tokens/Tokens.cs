@@ -1,14 +1,16 @@
 ﻿namespace ObjectLanguage.Compiler.Lexer.Tokens;
 
-public abstract record BaseToken(Span Span);
+public abstract record Token(Span Span);
 
-public record Identifier(string Name, Span Span) : BaseToken(Span);
+public record Identifier(string Name, Span Span) : Token(Span);
 
-public record Integer(int Value, Span Span) : BaseToken(Span);
+public record StringLiteral(string Text, Span Span) : Token(Span);
 
-public record Real(double Value, Span Span) : BaseToken(Span);
+public record Integer(int Value, Span Span) : Token(Span);
 
-public record Keyword(KeywordType Type, Span Span) : BaseToken(Span);
+public record Real(double Value, Span Span) : Token(Span);
+
+public record Keyword(KeywordType Type, Span Span) : Token(Span);
 
 public enum KeywordType
 {
@@ -33,3 +35,21 @@ public enum KeywordType
     Then,
     Else,
 }
+
+public record Symbol(string Text, SymbolType Type, Span Span) : Token(Span);
+
+public enum SymbolType 
+{
+    Comma,
+    Colon,
+    Semicolon,
+    LP,
+    RP,
+    LB,
+    RB,
+    
+    Dot,
+    Asan
+}
+
+

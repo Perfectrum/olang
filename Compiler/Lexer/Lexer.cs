@@ -6,7 +6,7 @@ namespace ObjectLanguage.Compiler.Lexer;
 
 public static class Lexer
 {
-    private static readonly ReadOnlyDictionary<string, KeywordType> _keywordTypes = new Dictionary<string, KeywordType>
+    private static readonly ReadOnlyDictionary<string, KeywordType> _keywordTypes = new(new Dictionary<string, KeywordType>
     {
         ["class"] = KeywordType.Class,
         ["extends"] = KeywordType.Extends,
@@ -23,7 +23,7 @@ public static class Lexer
         ["if"] = KeywordType.If,
         ["then"] = KeywordType.Then,
         ["else"] = KeywordType.Else,
-    }.AsReadOnly();
+    });
 
     // TODO: сделать точки + двоеточия
     public static IEnumerable<BaseToken> Analyze(Stream sourceFile)

@@ -80,7 +80,7 @@ class Program is
         var androidFactory = AndroidWidgetFactory()
         
         if this.CheckFactory(windowsFactory, 1).And(this.CheckFactory(androidFactory, -1)).Not() then
-            return
+            System.Console.WriteLine("Wrong Answer");
         end
     end
     

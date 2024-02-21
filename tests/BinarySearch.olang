@@ -7,11 +7,11 @@
         array.Set(3, 5.05)
         array.Set(4, 5.07)
         
-        if this.BinarySearch(array, 3.6).Equal(2).Not() then return end
+        if this.BinarySearch(array, 3.6).Equal(2).Not() then System.Console.WriteLine("Wrong Answer") end
             
-        if this.BinarySearch(array, 1).Equal(-1).Not() then return end
+        if this.BinarySearch(array, 1).Equal(-1).Not() then System.Console.WriteLine("Wrong Answer") end
         
-        if this.BinarySearch(array, 5.06).Equal(-1).Not() then return end
+        if this.BinarySearch(array, 5.06).Equal(-1).Not() then System.Console.WriteLine("Wrong Answer") end
     end
     
     method BinarySearch(array : Array[Real], target : Real) : Integer is
@@ -19,7 +19,7 @@
         var right : array.Length - 1
         
         while (left.LessEqual(right)) loop
-            var mid = left.Plus(right.Minus(left).Div(2));
+            var mid : left.Plus(right.Minus(left).Div(2))
             
             if array.Get(mid).Equal(target) then
                 return mid

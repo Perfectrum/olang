@@ -23,7 +23,7 @@ end
 
 class Program is
     this() is
-        var array = Array[Integer]()
+        var array : Array[Integer]()
         array.Set(0, 3)
         array.Set(1, 1)
         array.Set(2, 2)
@@ -39,11 +39,11 @@ class Program is
         while i.Less(v) loop
             var expectedElement : array.Get(i)
             
-            if stack.Peek().Equal(expectedElement).Not() then return end
+            if stack.Peek().Equal(expectedElement).Not() then System.Console.WriteLine("Wrong Answer") end
             
-            if stack.Pop().Equal(expectedElement).Not() then return end
+            if stack.Pop().Equal(expectedElement).Not() then System.Console.WriteLine("Wrong Answer") end
             
-            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then return end
+            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then System.Console.WriteLine("Wrong Answer") end
             
             i := i.Plus(1)
         end

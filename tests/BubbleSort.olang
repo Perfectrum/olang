@@ -31,7 +31,7 @@ class Program is
 		this.Sort(array)
 		
 		if this.CheckSorting(array) then
-		    return
+		    System.Console.WriteLine("Wrong Answer")
         end
 	end
 	

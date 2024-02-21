@@ -14,7 +14,7 @@ class Graph is
     
     this(v : Integer) is
         this.vertices := v
-        this.adjacencyList = Array[Vertex](v)
+        this.adjacencyList := Array[Vertex](v)
         var i : 0
         while i.Less(v) loop
             this.adjacencyList.Set(i, Vertex())
@@ -55,7 +55,7 @@ class Program is
     this() is
         var vertices : 4
     
-        var graph = Graph(vertices)
+        var graph : Graph(vertices)
         graph.AddEdge(0, 1)
         graph.AddEdge(0, 2)
         graph.AddEdge(1, 3)
@@ -63,7 +63,7 @@ class Program is
         graph.AddEdge(2, 3)
         graph.AddEdge(3, 1)
         
-        var expectedResult = Array[Boolean](vertices)
+        var expectedResult : Array[Boolean](vertices)
         expectedResult.Set(1, true)
         expectedResult.Set(2, true)
         expectedResult.Set(3, true)
@@ -72,7 +72,7 @@ class Program is
         var i : 0
         while i.Less(expectedResult.Length) loop
             if dfsResult.Get(i).And(expectedResult.Get(i)).Not() then
-                return
+                System.Console.WriteLine("Wrong Answer")
             end
             
             dfsResult := dfsResult.Tail()

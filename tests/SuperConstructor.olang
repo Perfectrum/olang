@@ -1,0 +1,12 @@
+
+class A is
+    this() is
+        System.Console.WriteLine("A")
+    end
+end
+
+class B extends A is
+    this() is
+        System.Console.WriteLine("B")
+    end
+end

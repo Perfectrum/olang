@@ -1,0 +1,18 @@
+
+class A is
+    method Show() is
+        System.Console.WriteLine("A")
+    end
+end
+
+class B extends A is
+    method Show() is
+        System.Console.WriteLine("B")
+    end
+end
+
+class C extends B is
+    method Show() is
+        System.Console.WriteLine("C")
+    end
+end

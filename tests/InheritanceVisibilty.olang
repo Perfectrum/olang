@@ -1,0 +1,20 @@
+class A is
+    method Foo() is
+        System.Console.WriteLine("FooA")
+    end
+end
+
+class B extends A is
+    method Bar() is
+        Foo()
+    end
+end
+
+class C extends A is
+    method Foo() is
+        System.Console.WriteLine("FooC")
+    end
+    method Bar() is
+        Foo()
+    end
+end

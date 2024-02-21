@@ -1,0 +1,4 @@
+class A is
+    method X() is
+    end
+end

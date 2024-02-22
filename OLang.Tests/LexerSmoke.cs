@@ -563,7 +563,7 @@ public class Condition
         Assert.Equal(4, tokens.Count);
 
         Assert.Equal(KeywordType.If, ((Keyword)tokens[0]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[1]).Type);
+        Assert.True(((BooleanLiteral)tokens[1]).Value);
         Assert.Equal(KeywordType.Then, ((Keyword)tokens[2]).Type);
         Assert.Equal(KeywordType.Return, ((Keyword)tokens[3]).Type);
     }
@@ -580,7 +580,7 @@ public class Condition
         Assert.Equal(6, tokens.Count);
 
         Assert.Equal(KeywordType.If, ((Keyword)tokens[0]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[1]).Type);
+        Assert.True(((BooleanLiteral)tokens[1]).Value);
         Assert.Equal(KeywordType.Then, ((Keyword)tokens[2]).Type);
         Assert.Equal(KeywordType.Return, ((Keyword)tokens[3]).Type);
         Assert.Equal(KeywordType.Else, ((Keyword)tokens[4]).Type);
@@ -608,15 +608,15 @@ public class Condition
         Assert.Equal(16, tokens.Count);
 
         Assert.Equal(KeywordType.If, ((Keyword)tokens[0]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[1]).Type);
+        Assert.True(((BooleanLiteral)tokens[1]).Value);
         
         Assert.Equal(KeywordType.Then, ((Keyword)tokens[2]).Type);
         Assert.Equal(KeywordType.If, ((Keyword)tokens[3]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[4]).Type);
+        Assert.True(((BooleanLiteral)tokens[4]).Value);
 
         Assert.Equal(KeywordType.Then, ((Keyword)tokens[5]).Type);
         Assert.Equal(KeywordType.If, ((Keyword)tokens[6]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[7]).Type);
+        Assert.True(((BooleanLiteral)tokens[7]).Value);
 
         Assert.Equal(KeywordType.Then, ((Keyword)tokens[8]).Type);
         Assert.Equal(KeywordType.Return, ((Keyword)tokens[9]).Type);
@@ -648,7 +648,7 @@ public class Loop
         Assert.Equal(4, tokens.Count);
 
         Assert.Equal(KeywordType.While, ((Keyword)tokens[0]).Type);
-        Assert.Equal(KeywordType.True, ((Keyword)tokens[1]).Type);
+        Assert.True(((BooleanLiteral)tokens[1]).Value);
         Assert.Equal(KeywordType.Loop, ((Keyword)tokens[2]).Type);
         Assert.Equal(KeywordType.End, ((Keyword)tokens[3]).Type);
     }

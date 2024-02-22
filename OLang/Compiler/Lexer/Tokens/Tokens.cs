@@ -6,6 +6,8 @@ public record Identifier(string Name, Span Span) : Token(Span);
 
 public record StringLiteral(string Text, Span Span) : Token(Span);
 
+public record BooleanLiteral(bool Value, Span Span) : Token(Span);
+
 public record Integer(int Value, Span Span) : Token(Span);
 
 public record Real(double Value, Span Span) : Token(Span);
@@ -27,9 +29,6 @@ public enum KeywordType
     
     While,
     Loop,
-    
-    True,
-    False,
     
     If,
     Then,

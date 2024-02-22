@@ -19,8 +19,6 @@ internal class Lexer
         ["return"] = KeywordType.Return,
         ["while"] = KeywordType.While,
         ["loop"] = KeywordType.Loop,
-        ["true"] = KeywordType.True,
-        ["false"] = KeywordType.False,
         ["if"] = KeywordType.If,
         ["then"] = KeywordType.Then,
         ["else"] = KeywordType.Else,
@@ -151,8 +149,8 @@ internal class Lexer
             {
                 Mode.BASIC => BasicCase(),
                 Mode.INTEGER => IntegerCase(),
-                Mode.REAL => DotCase(),
-                Mode.DOT => RealCase(),
+                Mode.DOT => DotCase(),
+                Mode.REAL => RealCase(),
                 Mode.STRING => StringCase(),
                 Mode.WORD => WordCase(),
                 _ => throw new ArgumentOutOfRangeException()
@@ -291,7 +289,11 @@ internal class Lexer
         {
             if (_keywordTypes.TryGetValue(word, out var type))
                 Yield(new Keyword(type, GetSpan()));
-            else
+            else if (word == "true") {
+                Yield(new BooleanLiteral(true, GetSpan()));
+            } else if (word == "false") {
+                Yield(new BooleanLiteral(false, GetSpan()));
+            } else
                 Yield(new Identifier(word, GetSpan()));
         }
 
@@ -318,8 +320,6 @@ internal class Lexer
         switch (_mode)
         {
             case Mode.INTEGER:
-            Console.WriteLine("######################################");
-                Console.WriteLine(word);
                 Yield(new Integer(int.Parse(word), GetSpan()));
                 return;
             case Mode.REAL:

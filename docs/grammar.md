@@ -2,9 +2,9 @@
 Program : { ClassDeclaration }
 
 ClassDeclaration :
-    class ClassName [ extends ClassName ] is
-        { MemberDeclaration }
-    end
+    'class' ClassName [ extends ClassName ] 'is'
+        { MemberDeclaration ';' }
+    'end' ';'
 
 ClassName : Identifier [ '[' ClassName ']' ]
 
@@ -16,44 +16,48 @@ MemberDeclaration :
     | StaticDeclaration
 
 FieldDeclaration :
-    field Identifier ':' Expression 'is' Expression
+    'field' Identifier ':' Identifier 'is' Expression
 
 StaticDeclaration :
-    static Identifier ':' Expression 'is' Expression
+    'static' Identifier ':' Identifier 'is' Expression
 
 MethodDeclaration :
-    method Identifier '(' Parameters ')' [ ':' Identifier ]
-    is Body end
+    'method' Identifier '(' Parameters ')' [ ':' Identifier ]
+    'is' Body 'end'
 
 FunctionDeclaration :
-    function Identifier '(' Parameters ')' [ ':' Identifier ]
-    is Body end
+    'function' Identifier '(' Parameters ')' [ ':' Identifier ]
+    'is' Body 'end'
 
-Parameters : [ ParameterDeclaration { , ParameterDeclaration } ]
+ConstructorDeclaration : this '(' Parameters ')' 'is' Body 'end'
+
+Parameters : [ ParameterDeclaration { ',' ParameterDeclaration } ]
 
 ParameterDeclaration : Identifier ':' ClassName
 
-Body : { VariableDeclaration | Statement }
+Body : { Statement ';' }
 
-VariableDeclaration : let Identifier ':' Identifier '=' Expression
-
-ConstructorDeclaration : this '(' [ Parameters ] ')' is Body end
+VariableDeclaration : 'let' Identifier [ ':' Identifier ] '=' Expression ';'
 
 Statement :
-      Assignment
+      VariableDeclaration
+    | Assignment
     | WhileLoop
     | IfStatement
     | ReturnStatement
+    | Expression
 
 Assignment : Identifier '=' Expression
 
-WhileLoop : while Expression loop Body end
+WhileLoop : 'while' Expression 'loop' Body 'end'
 
-IfStatement : if Expression then Body [ else Body ] end
+IfStatement : 'if' Expression 'then' Body [ else Body ] 'end'
 
-ReturnStatement : return [ Expression ]
+ReturnStatement : 'return' [ Expression ]
 
-Expression : Primary { '.' Identifier [ '(' Arguments ')' ] }
+Expression : ConstructorInvocation | Primary '.' Identifier [ '(' Arguments ')' ]
+
+ConstructorInvocation : Identifier '(' Arguments ')'
 
 Arguments : Expression { ',' Expression }
 

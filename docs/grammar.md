@@ -4,7 +4,7 @@ Program : { ClassDeclaration }
 ClassDeclaration :
     'class' ClassName [ extends ClassName ] 'is'
         { MemberDeclaration ';' }
-    'end' ';'
+    'end'
 
 ClassName : Identifier [ '[' ClassName ']' ]
 
@@ -55,11 +55,17 @@ IfStatement : 'if' Expression 'then' Body [ else Body ] 'end'
 
 ReturnStatement : 'return' [ Expression ]
 
-Expression : ConstructorInvocation | Primary '.' Identifier [ '(' Arguments ')' ]
+Expression : ConstructorInvocation
+           | MethodCall
+           | ValueGetting
 
 ConstructorInvocation : Identifier '(' Arguments ')'
 
-Arguments : Expression { ',' Expression }
+MethodCall : Primary '.' Identifier '(' Arguments ')'
+
+ValueGetting : Primary '.' Identifier
+
+Arguments : [ Expression { ',' Expression } ]
 
 Primary :
       IntegerLiteral

@@ -4,7 +4,7 @@ Program : { ClassDeclaration }
 ClassDeclaration :
     'class' ClassName [ extends ClassName ] 'is'
         { MemberDeclaration ';' }
-    'end'
+    'end' ';'
 
 ClassName : Identifier [ '[' ClassName ']' ]
 

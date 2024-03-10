@@ -867,7 +867,7 @@ public class Class
 public class ExtendedLexer
 {
 
-    private static SuperLexer Instance() => new ();
+    private static SuperLexer Instance() => new();
 
     [Fact]
     public void Easy()

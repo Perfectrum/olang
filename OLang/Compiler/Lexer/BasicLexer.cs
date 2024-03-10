@@ -296,13 +296,9 @@ internal class BasicLexer : ILexer
         {
             if (_keywordTypes.TryGetValue(word, out var type))
                 Yield(new Keyword(type, GetSpan()));
-            else if (word == "true")
+            else if (bool.TryParse(word, out var val))
             {
-                Yield(new BooleanLiteral(true, GetSpan()));
-            }
-            else if (word == "false")
-            {
-                Yield(new BooleanLiteral(false, GetSpan()));
+                Yield(new BooleanLiteral(val, GetSpan()));
             }
             else
                 Yield(new Identifier(word, GetSpan()));

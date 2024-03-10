@@ -5,6 +5,47 @@ namespace OLang.Compiler.Lexer;
 
 internal class SuperLexer : ILexer
 {
+    private readonly static HashSet<KeywordType> _afterKeywords = [
+        KeywordType.Class,
+        KeywordType.Extends,
+        KeywordType.Is,
+        KeywordType.Var,
+        KeywordType.Method,
+        KeywordType.While,
+        KeywordType.Loop,
+        KeywordType.If,
+        KeywordType.Then,
+        KeywordType.Else,
+        KeywordType.Static,
+        KeywordType.Field,
+        KeywordType.Function
+    ];
+    private readonly static HashSet<SymbolType> _afterSymbols = [
+        SymbolType.Semicolon,
+        SymbolType.Comma,
+        SymbolType.Colon,
+        SymbolType.LP,
+        SymbolType.LB,
+        SymbolType.Dot,
+        SymbolType.Asan
+    ];
+
+    private readonly static HashSet<KeywordType> _beforeKeywords = [
+        KeywordType.Extends,
+        KeywordType.Is,
+        KeywordType.Then,
+        KeywordType.Loop
+    ];
+    private readonly static HashSet<SymbolType> _beforeSymbols = [
+        SymbolType.Comma,
+        SymbolType.LP,
+        SymbolType.RP,
+        SymbolType.RB,
+        SymbolType.Semicolon,
+        SymbolType.Dot,
+        SymbolType.Asan,
+        SymbolType.Colon
+    ];
 
     private static Span MakeSpanAfter(Span? span)
     {
@@ -18,50 +59,22 @@ internal class SuperLexer : ILexer
 
     private static bool ShouldNotAddSemicolonAfterToken(Token? token)
     {
-        if (token is null) return true;
         return token switch
         {
-            Keyword { Type: KeywordType.Class } => true,
-            Keyword { Type: KeywordType.Extends } => true,
-            Keyword { Type: KeywordType.Is } => true,
-            Keyword { Type: KeywordType.Var } => true,
-            Keyword { Type: KeywordType.Method } => true,
-            Keyword { Type: KeywordType.While } => true,
-            Keyword { Type: KeywordType.Loop } => true,
-            Keyword { Type: KeywordType.If } => true,
-            Keyword { Type: KeywordType.Then } => true,
-            Keyword { Type: KeywordType.Else } => true,
-            Keyword { Type: KeywordType.Static } => true,
-            Keyword { Type: KeywordType.Field } => true,
-            Keyword { Type: KeywordType.Function } => true,
-            Symbol { Type: SymbolType.Semicolon } => true,
-            Symbol { Type: SymbolType.Comma } => true,
-            Symbol { Type: SymbolType.Colon } => true,
-            Symbol { Type: SymbolType.LP } => true,
-            Symbol { Type: SymbolType.LB } => true,
-            Symbol { Type: SymbolType.Dot } => true,
-            Symbol { Type: SymbolType.Asan } => true,
+            null => true,
+            Keyword k => _afterKeywords.Contains(k.Type),
+            Symbol s => _afterSymbols.Contains(s.Type),
             _ => false
         };
     }
 
     private static bool ShouldNotAddSemicolonBeforeToken(Token? token)
     {
-        if (token is null) return false;
         return token switch
         {
-            Keyword { Type: KeywordType.Extends } => true,
-            Keyword { Type: KeywordType.Is } => true,
-            Keyword { Type: KeywordType.Then } => true,
-            Keyword { Type: KeywordType.Loop } => true,
-            Symbol { Type: SymbolType.Comma } => true,
-            Symbol { Type: SymbolType.LP } => true,
-            Symbol { Type: SymbolType.RP } => true,
-            Symbol { Type: SymbolType.RB } => true,
-            Symbol { Type: SymbolType.Semicolon } => true,
-            Symbol { Type: SymbolType.Dot } => true,
-            Symbol { Type: SymbolType.Asan } => true,
-            Symbol { Type: SymbolType.Colon } => true,
+            null => false,
+            Keyword k => _beforeKeywords.Contains(k.Type),
+            Symbol s => _beforeSymbols.Contains(s.Type),
             _ => false
         };
     }

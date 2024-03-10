@@ -10,7 +10,7 @@ if (File.Exists(pathToSourceCode) == false)
 }
 
 using var sourceFile = File.OpenRead(pathToSourceCode);
-var lex = ILexer.GetLexer();
+var lex = new SuperLexer();
 var tokensStream = lex.Feed(sourceFile);
 
 foreach (var token in tokensStream)

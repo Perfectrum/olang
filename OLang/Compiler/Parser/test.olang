@@ -1,0 +1,11 @@
+class Program extends Integer is
+    this() is
+        if 0 then
+            
+        end;
+    end;
+end;
+
+class Test2 is
+
+end;

@@ -61,9 +61,9 @@ Expression : ConstructorInvocation
 
 ConstructorInvocation : Identifier '(' Arguments ')'
 
-MethodCall : Primary '.' Identifier '(' Arguments ')'
+MethodCall : ( Primary | Expression) '.' Identifier '(' Arguments ')'
 
-ValueGetting : Primary '.' Identifier
+ValueGetting : ( Primary | Expression) '.' Identifier
 
 Arguments : [ Expression { ',' Expression } ]
 

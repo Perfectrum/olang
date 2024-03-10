@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using System.Text;
 using OLang.Compiler.Lexer.Tokens;
 
-internal class Lexer
+namespace OLang.Compiler.Lexer;
+
+internal class BasicLexer : ILexer
 {
     ///////////////////////////////////////////////////////////
     // Keywords
@@ -10,6 +12,10 @@ internal class Lexer
     private static readonly ReadOnlyDictionary<string, KeywordType> _keywordTypes = new(new Dictionary<string, KeywordType>
     {
         ["class"] = KeywordType.Class,
+        ["static"] = KeywordType.Static,
+        ["super"] = KeywordType.Super,
+        ["field"] = KeywordType.Field,
+        ["function"] = KeywordType.Function,
         ["extends"] = KeywordType.Extends,
         ["var"] = KeywordType.Var,
         ["this"] = KeywordType.This,
@@ -172,6 +178,7 @@ internal class Lexer
     {
         if (IsCurrentNewLine())
         {
+            Yield(new NewLine(CurrentSpan));
             NewLine();
             return null;
         }
@@ -289,11 +296,15 @@ internal class Lexer
         {
             if (_keywordTypes.TryGetValue(word, out var type))
                 Yield(new Keyword(type, GetSpan()));
-            else if (word == "true") {
+            else if (word == "true")
+            {
                 Yield(new BooleanLiteral(true, GetSpan()));
-            } else if (word == "false") {
+            }
+            else if (word == "false")
+            {
                 Yield(new BooleanLiteral(false, GetSpan()));
-            } else
+            }
+            else
                 Yield(new Identifier(word, GetSpan()));
         }
 

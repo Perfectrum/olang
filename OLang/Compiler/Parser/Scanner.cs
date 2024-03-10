@@ -61,7 +61,7 @@ internal class Scanner(IEnumerable<Token> tokens, StreamWriter errorStream) : Ba
             {
                 KeywordType.Class => TokenType.CLASS,
                 KeywordType.Extends => TokenType.EXTENDS,
-                KeywordType.Var => TokenType.VAR,
+                KeywordType.Var => TokenType.LET,
                 KeywordType.This => TokenType.THIS,
                 KeywordType.Method => TokenType.METHOD,
                 KeywordType.Is => TokenType.IS,

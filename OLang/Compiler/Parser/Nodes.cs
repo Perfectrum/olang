@@ -5,25 +5,48 @@ namespace OLang.Compiler.Parser;
 using Parameters = ReadOnlyCollection<Parameter>;
 using Body = ReadOnlyCollection<Statement>;
 using Members = ReadOnlyCollection<MemberDeclaration>;
+using Arguments = ReadOnlyCollection<Expression>;
 
-internal record TemporaryListNode(List<Node> Nodes) : Node
+public interface IStatementVisitor
+{
+    void Visit(IfStatement ifStatement);
+    void Visit(Variable variable);
+    void Visit(Assigment assigment);
+    void Visit(WhileLoop whileLoop);
+    void Visit(ReturnStatement returnStatement);
+    void Visit(ConstructorInvocation constructorInvocation);
+    void Visit(MethodCall methodCall);
+    void Visit(ValueGetting valueGetting);
+    void Visit<T>(ValueNode<T> valueNode);
+    void Visit(ClassName className);
+}
+
+public interface IMemberDeclarationVisitor
+{
+    void Visit(Field field);
+    void Visit(Constructor constructor);
+    void Visit(Method method);
+}
+
+internal record TemporaryListNode(List<INode> Nodes) : INode
 {
     // TODO: мейби можно придумать без вызова .Cast<T>().ToArray(), чтобы память лишнюю не выделять, но пока так
     public ReadOnlyCollection<T> Collect<T>() => Nodes.Cast<T>().ToArray().AsReadOnly();
 }
 
-internal record ValueNode<T>(T Value) : Node;
+public interface INode;
 
-public abstract record Node
+public record Program(ReadOnlyCollection<Class> Classes) : INode;
+
+public abstract record MemberDeclaration : INode
 {
-    // public abstract void Visit(IVisitorNodes visitor);
+    public abstract void Visit(IMemberDeclarationVisitor visitor);
 }
 
-public record Program(ReadOnlyCollection<Class> Classes) : Node;
-
-public abstract record MemberDeclaration : Node;
-
-public record Parameter(string Name, ClassName Type) : Node;
+public record Parameter(
+    string Name,
+    ClassName Type
+) : INode;
 
 public record Field(
     // TODO: не уверен, что будет удобно
@@ -31,12 +54,18 @@ public record Field(
     string Name,
     ClassName? Type,
     Expression Expression
-) : MemberDeclaration;
+) : MemberDeclaration
+{
+    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+}
 
 public record Constructor(
     Parameters Parameters,
     Body Body
-) : MemberDeclaration;
+) : MemberDeclaration
+{
+    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+}
 
 public record Method(
     // TODO: тоже не уверен, что будет удобно
@@ -45,22 +74,100 @@ public record Method(
     Parameters Parameters,
     ClassName? ReturnType,
     Body Body
-) : MemberDeclaration;
+) : MemberDeclaration
+{
+    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+}
 
 public record Class(
     ClassName Name,
     ClassName? Extends,
     Members Members
-) : Node;
+) : INode;
 
-public record ClassName(string Name, ClassName? GenericArgument) : Node;
+public abstract record Statement : INode
+{
+    public abstract void Visit(IStatementVisitor visitor);
+}
 
-public record Statement : Node;
+public record Assigment(
+    string VariableName,
+    Expression Expression
+) : Statement
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
 
-public record Expression : Statement;
+public record WhileLoop(
+    Expression Condition,
+    Body Body
+) : Statement
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
 
-public record If(
+public record IfStatement(
     Expression Condition,
     Body TrueBlock,
     Body? FalseBlock
-) : Expression;
+) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public record ReturnStatement(
+    Expression? Expression
+) : Statement
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public record Variable(
+    string Name,
+    ClassName? Type,
+    Expression Expression
+) : Statement
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public abstract record Expression : Statement;
+
+public record ConstructorInvocation(
+    ClassName ClassName,
+    Arguments Arguments
+) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public record MethodCall(
+    Expression Expression,
+    string MethodName,
+    Arguments Arguments
+) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public record ValueGetting(
+    Expression Expression,
+    string FieldName
+) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+// TODO: мейби можно переделать на явные int, string и т. д.
+public record ValueNode<T>(T Value) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+public record ClassName(
+    string Name,
+    ClassName? GenericArgument
+) : Expression
+{
+    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+}

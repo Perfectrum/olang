@@ -1,11 +1,12 @@
-class Program extends Integer is
+class Program is
     this() is
-        if 0 then
+        if true then
+            System(0);
+            if true.Not() then System("Wrong Answer"); end;
             
+            if false then System.Console.WriteLine("Wrong Answer"); end;
+        else
+        
         end;
     end;
-end;
-
-class Test2 is
-
 end;

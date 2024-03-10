@@ -1,6 +1,6 @@
 /* For some reason the constructor does not generate itself */
 %{
-    public Parser(AbstractScanner<Node, LexLocation> scanner) : base(scanner) { }
+    public Parser(AbstractScanner<INode, LexLocation> scanner) : base(scanner) { }
 %}
 
 %output = Parser.Generated.cs
@@ -14,13 +14,13 @@
 
 %using OLang.Compiler.Lexer.Tokens
 
-%YYSTYPE Node
+%YYSTYPE INode
 
 %start Program
 
 %token CLASS
 %token EXTENDS
-%token VAR
+%token LET
 %token THIS
 %token METHOD
 %token IS
@@ -45,7 +45,6 @@
 %token FIELD
 %token STATIC
 %token FUNCTION
-%token LET
 %token SUPER
 
 %token INTEGER
@@ -130,7 +129,7 @@ Body
     ;
 
 VariableDeclaration
-    : LET IDENTIFIER SpecifyingType ASAN Expression SEMICOLON
+    : LET IDENTIFIER SpecifyingType ASAN Expression { $$ = CreateVariable($2, $3, $5); }
     ;
 
 SpecifyingType
@@ -153,11 +152,11 @@ Statement
     ;
 
 Assignment
-    : IDENTIFIER ASAN Expression
+    : IDENTIFIER ASAN Expression { $$ = CreateAssigment($1, $3); }
     ;
 
 WhileLoop
-    : WHILE Expression LOOP Body END
+    : WHILE Expression LOOP Body END { $$ = CreateWhileLoop($2, $4); }
     ;
 
 IfStatement
@@ -171,34 +170,36 @@ ElseTail
 
 // TODO: мейби вынести, как на паре показывали (но хочется посмотреть самому на конфликты)
 ReturnStatement
-    : RETURN
-    | RETURN Expression
+    : RETURN { $$ = CreateReturn(null); }
+    | RETURN Expression { $$ = CreateReturn($2); }
     ;
 
 Expression
     : ConstructorInvocation
     | MethodCall
     | ValueGetting
-    | Primary { $$ = Scanner.yylval; }
+    | Primary
     ;
 
 ConstructorInvocation
-    : IDENTIFIER LPARENT Arguments RPARENT
+    : ClassName LPARENT Arguments RPARENT { $$ = CreateConstructorInvocation($1, $3); }
     ;
 
 MethodCall
-    : Primary DOT IDENTIFIER LPARENT Arguments RPARENT
+    : Expression DOT IDENTIFIER LPARENT Arguments RPARENT { $$ = CreateMethodCall($1, $3, $5); }
     ;
 
 ValueGetting
-    : Primary DOT IDENTIFIER 
+    : Expression DOT IDENTIFIER { $$ = CreateValueGetting($1, $3); }
     ;
 
 Arguments
-    : 
-    | Arguments COMMA Expression
+    : { $$ = CreateNewList(); }
+    | Expression { $$ = CreateNewList($1); }
+    | Arguments COMMA Expression { AddToList($$, $3); $$ = $1; }
     ;
 
+// TODO: не знаю, что нужны ли Scanner.yylval -- надо будет проверить
 Primary
     : INTEGER
     | REAL

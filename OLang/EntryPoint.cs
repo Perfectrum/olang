@@ -20,5 +20,5 @@ var parser = new Parser(new Scanner(tokensStream, errorStream));
 if (parser.Parse() == false)
     errorStream.WriteLine("Error Parsing");
 else
-    outputStream.WriteLine(parser.EndNode);
+    Printer.Print((OLang.Compiler.Parser.Program)parser.EndNode, outputStream);
 

@@ -54,7 +54,6 @@
 %token STRING
 
 %%
-
 Program
     : ClassDeclarations { $$ = CreateProgram($1); }
     ;
@@ -168,7 +167,7 @@ ElseTail
     | ELSE Body { $$ = $2; }
     ;
 
-// TODO: мейби вынести, как на паре показывали (но хочется посмотреть самому на конфликты)
+// TODO: пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 ReturnStatement
     : RETURN { $$ = CreateReturn(null); }
     | RETURN Expression { $$ = CreateReturn($2); }
@@ -199,7 +198,7 @@ Arguments
     | Arguments COMMA Expression { AddToList($$, $3); $$ = $1; }
     ;
 
-// TODO: не знаю, что нужны ли Scanner.yylval -- надо будет проверить
+// TODO: пїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Scanner.yylval -- пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 Primary
     : INTEGER
     | REAL
@@ -209,5 +208,4 @@ Primary
     | ClassName
     | SUPER
     ;
-
 %%

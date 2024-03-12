@@ -26,5 +26,8 @@
             <OutputFile>Compiler\Parser\Parser.Generated.cs</OutputFile>
         </YaccFile>
     </ItemGroup>
-
+    
+    <Target Name="GenerateGrammarDocs" BeforeTargets="Build">
+        <Exec Command="csi GenerateGrammarDocs.csx" />
+    </Target>
 </Project>

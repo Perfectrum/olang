@@ -2,6 +2,8 @@ namespace OLang.Compiler.Lexer.Tokens;
 
 public abstract record Token(Span Span);
 
+public record NewLine(Span Span) : Token(Span);
+
 public record Identifier(string Name, Span Span) : Token(Span);
 
 public record StringLiteral(string Text, Span Span) : Token(Span);
@@ -18,26 +20,31 @@ public enum KeywordType
 {
     Class,
     Extends,
-    
+
     Var,
     This,
-    
+    Super,
+
     Method,
     Is,
     End,
     Return,
-    
+
     While,
     Loop,
-    
+
     If,
     Then,
     Else,
+
+    Static,
+    Field,
+    Function
 }
 
 public record Symbol(string Text, SymbolType Type, Span Span) : Token(Span);
 
-public enum SymbolType 
+public enum SymbolType
 {
     Comma,
     Colon,
@@ -46,7 +53,7 @@ public enum SymbolType
     RP,
     LB,
     RB,
-    
+
     Dot,
     Asan
 }

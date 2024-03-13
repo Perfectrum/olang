@@ -1,15 +1,67 @@
 using Xunit;
 using System;
 using System.Text;
-using OLang.Compiler.Lexer;
 using OLang.Compiler.Lexer.Tokens;
 using System.Globalization;
+using OLang.Compiler.Lexer;
 
 namespace OLang.Tests;
 
+public static class Comparator
+{
+    public static void Compare(Token[][] expected, IEnumerable<Token> actual)
+    {
+        var iter = actual.GetEnumerator();
+        foreach (var line in expected)
+        {
+            foreach (var token in line)
+            {
+                Assert.True(iter.MoveNext());
+                var b = iter.Current;
+                var a = token with { Span = b.Span };
+                Assert.Equal(a, b);
+            }
+        }
+    }
+}
+
+public static class R
+{
+
+    private static Span EmptySpan => new(0, 0, 0);
+
+    public static Token[][] P(params Token[][] xs) => xs;
+    public static Token[] L(params Token[] xs) => xs;
+
+    public static Stream Text(string str)
+    {
+        byte[] byteArray = Encoding.UTF8.GetBytes(str);
+        return new MemoryStream(byteArray);
+    }
+
+    public static Token Ident(string str) => new Identifier(str, EmptySpan);
+
+    public static Token Cls => new Keyword(KeywordType.Class, EmptySpan);
+    public static Token Method => new Keyword(KeywordType.Method, EmptySpan);
+    public static Token While => new Keyword(KeywordType.While, EmptySpan);
+    public static Token Loop => new Keyword(KeywordType.Loop, EmptySpan);
+    public static Token End => new Keyword(KeywordType.End, EmptySpan);
+    public static Token Is => new Keyword(KeywordType.Is, EmptySpan);
+
+    public static Token True => new BooleanLiteral(true, EmptySpan);
+    public static Token False => new BooleanLiteral(false, EmptySpan);
+
+    public static Token SC => new Symbol(";", SymbolType.Semicolon, EmptySpan);
+    public static Token CM => new Symbol(",", SymbolType.Comma, EmptySpan);
+    public static Token Dot => new Symbol(".", SymbolType.Dot, EmptySpan);
+    public static Token LP => new Symbol("(", SymbolType.LP, EmptySpan);
+    public static Token RP => new Symbol(")", SymbolType.RP, EmptySpan);
+
+}
+
 public class IntegrTest
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void Zero()
@@ -49,7 +101,7 @@ public class IntegrTest
         Assert.Equal(int.MaxValue, ((Integer)tokens[0]).Value);
     }
 
-    [Fact (Skip = "Unary minus is not implemented yet")]
+    [Fact(Skip = "Unary minus is not implemented yet")]
     public void MinInteger()
     {
         byte[] byteArray = Encoding.UTF8.GetBytes(int.MinValue.ToString());
@@ -66,7 +118,8 @@ public class IntegrTest
     {
         Random random = new Random();
 
-        for(int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 10_000; i++)
+        {
             // TODO: Когда (если) заработает унарный минус, нижней границей должно быть int.MinValue
             int x = random.Next(0, int.MaxValue);
 
@@ -85,7 +138,8 @@ public class IntegrTest
     {
         Random random = new Random();
 
-        for(int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1000; i++)
+        {
 
             int length = random.Next(1, 101);
 
@@ -102,12 +156,12 @@ public class IntegrTest
 
             var tokens = lexer.Feed(stream).ToList();
 
-            Assert.Equal(length*2-1, tokens.Count);
+            Assert.Equal(length * 2 - 1, tokens.Count);
 
             for (int index = 0; index < tokens.Count; index++)
             {
                 if (index % 2 == 0)
-                    Assert.Equal(source[index/2], ((Integer)tokens[index]).Value);
+                    Assert.Equal(source[index / 2], ((Integer)tokens[index]).Value);
                 else
                     Assert.Equal(SymbolType.Comma, ((Symbol)tokens[index]).Type);
             }
@@ -117,14 +171,14 @@ public class IntegrTest
 
 public class RealTest
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void Zero()
     {
         string str = "0.0";
         byte[] byteArray = Encoding.UTF8.GetBytes(str);
-        MemoryStream stream = new MemoryStream(byteArray);
+        MemoryStream stream = new(byteArray);
 
         var tokens = lexer.Feed(stream).ToList();
 
@@ -158,7 +212,7 @@ public class RealTest
         Assert.Equal(double.MaxValue, ((Real)tokens[0]).Value);
     }
 
-    [Fact (Skip = "Unary minus is not implemented yet")]
+    [Fact(Skip = "Unary minus is not implemented yet")]
     public void MinReal()
     {
         string str = double.MinValue.ToString("F", CultureInfo.InvariantCulture);
@@ -189,7 +243,8 @@ public class RealTest
     {
         Random random = new Random();
 
-        for(int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 10_000; i++)
+        {
             // TODO: Когда (если) заработает унарный минус, нижней границей должно быть double.MinValue
             double x = random.NextDouble() * double.MaxValue;
 
@@ -208,7 +263,8 @@ public class RealTest
     {
         Random random = new Random();
 
-        for(int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++)
+        {
 
             int length = random.Next(1, 101);
             string str = "";
@@ -219,7 +275,7 @@ public class RealTest
                 // TODO: Когда (если) заработает унарный минус, нижней границей должно быть double.MinValue
                 double x = random.NextDouble() * double.MaxValue;
                 source[index] = x;
-                str+= x.ToString("F", CultureInfo.InvariantCulture) + ",";
+                str += x.ToString("F", CultureInfo.InvariantCulture) + ",";
             }
 
             byte[] byteArray = Encoding.UTF8.GetBytes(str[..^1]);
@@ -227,12 +283,12 @@ public class RealTest
 
             var tokens = lexer.Feed(stream).ToList();
 
-            Assert.Equal(length*2-1, tokens.Count);
+            Assert.Equal(length * 2 - 1, tokens.Count);
 
             for (int index = 0; index < tokens.Count; index++)
             {
                 if (index % 2 == 0)
-                    Assert.Equal(source[index/2], ((Real)tokens[index]).Value);
+                    Assert.Equal(source[index / 2], ((Real)tokens[index]).Value);
 
                 else
                     Assert.Equal(SymbolType.Comma, ((Symbol)tokens[index]).Type);
@@ -243,7 +299,7 @@ public class RealTest
 
 public class MethodCall
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void IntegerMethod()
@@ -418,7 +474,7 @@ public class MethodCall
 
         Assert.Equal(42, ((Integer)tokens[6]).Value);
         Assert.Equal(SymbolType.Comma, ((Symbol)tokens[7]).Type);
-        
+
         Assert.Equal(3.14, ((Real)tokens[8]).Value);
         Assert.Equal(SymbolType.Comma, ((Symbol)tokens[9]).Type);
 
@@ -433,7 +489,7 @@ public class MethodCall
 
 public class DotCall
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void SimpleField()
@@ -503,11 +559,11 @@ public class DotCall
     public void KeywordAsField()
     {
         Array keywords = Enum.GetValues(typeof(KeywordType));
-        foreach(KeywordType keyword in keywords)
+        foreach (KeywordType keyword in keywords)
         {
             string str = "Something." + keyword.ToString().ToLower();
             byte[] byteArray = Encoding.UTF8.GetBytes(str);
-            MemoryStream stream = new MemoryStream(byteArray);
+            MemoryStream stream = new(byteArray);
 
             var tokens = lexer.Feed(stream).ToList();
 
@@ -549,7 +605,7 @@ public class DotCall
 
 public class Condition
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void SingleBranch()
@@ -586,8 +642,8 @@ public class Condition
         Assert.Equal(KeywordType.Else, ((Keyword)tokens[4]).Type);
         Assert.Equal(KeywordType.Return, ((Keyword)tokens[5]).Type);
     }
-    
-    
+
+
     [Fact]
     public void Deep()
     {
@@ -605,36 +661,42 @@ public class Condition
 
         var tokens = lexer.Feed(stream).ToList();
 
-        Assert.Equal(16, tokens.Count);
+        Assert.Equal(22, tokens.Count);
 
         Assert.Equal(KeywordType.If, ((Keyword)tokens[0]).Type);
         Assert.True(((BooleanLiteral)tokens[1]).Value);
-        
-        Assert.Equal(KeywordType.Then, ((Keyword)tokens[2]).Type);
-        Assert.Equal(KeywordType.If, ((Keyword)tokens[3]).Type);
-        Assert.True(((BooleanLiteral)tokens[4]).Value);
+        Assert.IsType<NewLine>(tokens[2]);
 
-        Assert.Equal(KeywordType.Then, ((Keyword)tokens[5]).Type);
-        Assert.Equal(KeywordType.If, ((Keyword)tokens[6]).Type);
-        Assert.True(((BooleanLiteral)tokens[7]).Value);
+        Assert.Equal(KeywordType.Then, ((Keyword)tokens[3]).Type);
+        Assert.Equal(KeywordType.If, ((Keyword)tokens[4]).Type);
+        Assert.True(((BooleanLiteral)tokens[5]).Value);
+        Assert.IsType<NewLine>(tokens[6]);
 
-        Assert.Equal(KeywordType.Then, ((Keyword)tokens[8]).Type);
-        Assert.Equal(KeywordType.Return, ((Keyword)tokens[9]).Type);
-        
-        Assert.Equal(KeywordType.Else, ((Keyword)tokens[10]).Type);
-        Assert.Equal(KeywordType.Return, ((Keyword)tokens[11]).Type);
+        Assert.Equal(KeywordType.Then, ((Keyword)tokens[7]).Type);
+        Assert.Equal(KeywordType.If, ((Keyword)tokens[8]).Type);
+        Assert.True(((BooleanLiteral)tokens[9]).Value);
+        Assert.IsType<NewLine>(tokens[10]);
 
-        Assert.Equal(KeywordType.Else, ((Keyword)tokens[12]).Type);
-        Assert.Equal(KeywordType.Return, ((Keyword)tokens[13]).Type);
+        Assert.Equal(KeywordType.Then, ((Keyword)tokens[11]).Type);
+        Assert.Equal(KeywordType.Return, ((Keyword)tokens[12]).Type);
+        Assert.IsType<NewLine>(tokens[13]);
 
         Assert.Equal(KeywordType.Else, ((Keyword)tokens[14]).Type);
         Assert.Equal(KeywordType.Return, ((Keyword)tokens[15]).Type);
+        Assert.IsType<NewLine>(tokens[16]);
+
+        Assert.Equal(KeywordType.Else, ((Keyword)tokens[17]).Type);
+        Assert.Equal(KeywordType.Return, ((Keyword)tokens[18]).Type);
+        Assert.IsType<NewLine>(tokens[19]);
+
+        Assert.Equal(KeywordType.Else, ((Keyword)tokens[20]).Type);
+        Assert.Equal(KeywordType.Return, ((Keyword)tokens[21]).Type);
     }
 }
 
 public class Loop
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void EmptyInfiniteLoop()
@@ -656,7 +718,7 @@ public class Loop
 
 public class Class
 {
-    private Lexer lexer = new Lexer();
+    private readonly BasicLexer lexer = new();
 
     [Fact]
     public void EmptyClass()
@@ -715,37 +777,41 @@ public class Class
 
         var tokens = lexer.Feed(stream).ToList();
 
-        Assert.Equal(25, tokens.Count);
+        Assert.Equal(29, tokens.Count);
 
         Assert.Equal(KeywordType.Class, ((Keyword)tokens[0]).Type);
         Assert.Equal("Human", ((Identifier)tokens[1]).Name);
         Assert.Equal(KeywordType.Is, ((Keyword)tokens[2]).Type);
+        Assert.IsType<NewLine>(tokens[3]);
 
-        Assert.Equal(KeywordType.This, ((Keyword)tokens[3]).Type);
-        Assert.Equal(SymbolType.LP, ((Symbol)tokens[4]).Type);
-        Assert.Equal(SymbolType.RP, ((Symbol)tokens[5]).Type);
-        Assert.Equal(KeywordType.Is, ((Keyword)tokens[6]).Type);
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[7]).Type);
+        Assert.Equal(KeywordType.This, ((Keyword)tokens[4]).Type);
+        Assert.Equal(SymbolType.LP, ((Symbol)tokens[5]).Type);
+        Assert.Equal(SymbolType.RP, ((Symbol)tokens[6]).Type);
+        Assert.Equal(KeywordType.Is, ((Keyword)tokens[7]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[8]).Type);
+        Assert.IsType<NewLine>(tokens[9]);
 
-        Assert.Equal("Eat", ((Identifier)tokens[8]).Name);
-        Assert.Equal(SymbolType.LP, ((Symbol)tokens[9]).Type);
-        Assert.Equal("food", ((Identifier)tokens[10]).Name);
-        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[11]).Type);
-        Assert.Equal("Food", ((Identifier)tokens[12]).Name);
-        Assert.Equal(SymbolType.RP, ((Symbol)tokens[13]).Type);
-        Assert.Equal(KeywordType.Is, ((Keyword)tokens[14]).Type);
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[15]).Type);
+        Assert.Equal("Eat", ((Identifier)tokens[10]).Name);
+        Assert.Equal(SymbolType.LP, ((Symbol)tokens[11]).Type);
+        Assert.Equal("food", ((Identifier)tokens[12]).Name);
+        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[13]).Type);
+        Assert.Equal("Food", ((Identifier)tokens[14]).Name);
+        Assert.Equal(SymbolType.RP, ((Symbol)tokens[15]).Type);
+        Assert.Equal(KeywordType.Is, ((Keyword)tokens[16]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[17]).Type);
+        Assert.IsType<NewLine>(tokens[18]);
 
-        Assert.Equal("Sleep", ((Identifier)tokens[16]).Name);
-        Assert.Equal(SymbolType.LP, ((Symbol)tokens[17]).Type);
-        Assert.Equal("hours", ((Identifier)tokens[18]).Name);
-        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[19]).Type);
-        Assert.Equal("Integer", ((Identifier)tokens[20]).Name);
-        Assert.Equal(SymbolType.RP, ((Symbol)tokens[21]).Type);
-        Assert.Equal(KeywordType.Is, ((Keyword)tokens[22]).Type);
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[23]).Type);
+        Assert.Equal("Sleep", ((Identifier)tokens[19]).Name);
+        Assert.Equal(SymbolType.LP, ((Symbol)tokens[20]).Type);
+        Assert.Equal("hours", ((Identifier)tokens[21]).Name);
+        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[22]).Type);
+        Assert.Equal("Integer", ((Identifier)tokens[23]).Name);
+        Assert.Equal(SymbolType.RP, ((Symbol)tokens[24]).Type);
+        Assert.Equal(KeywordType.Is, ((Keyword)tokens[25]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[26]).Type);
+        Assert.IsType<NewLine>(tokens[27]);
 
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[24]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[28]).Type);
     }
 
     [Fact]
@@ -763,33 +829,146 @@ public class Class
 
         var tokens = lexer.Feed(stream).ToList();
 
-        Assert.Equal(20, tokens.Count);
+        Assert.Equal(24, tokens.Count);
 
         Assert.Equal(KeywordType.Class, ((Keyword)tokens[0]).Type);
         Assert.Equal("Test", ((Identifier)tokens[1]).Name);
         Assert.Equal(KeywordType.Is, ((Keyword)tokens[2]).Type);
+        Assert.IsType<NewLine>(tokens[3]);
 
-        Assert.Equal(KeywordType.This, ((Keyword)tokens[3]).Type);
-        Assert.Equal(SymbolType.LP, ((Symbol)tokens[4]).Type);
-        Assert.Equal(SymbolType.RP, ((Symbol)tokens[5]).Type);
-        Assert.Equal(KeywordType.Is, ((Keyword)tokens[6]).Type);
+        Assert.Equal(KeywordType.This, ((Keyword)tokens[4]).Type);
+        Assert.Equal(SymbolType.LP, ((Symbol)tokens[5]).Type);
+        Assert.Equal(SymbolType.RP, ((Symbol)tokens[6]).Type);
+        Assert.Equal(KeywordType.Is, ((Keyword)tokens[7]).Type);
+        Assert.IsType<NewLine>(tokens[8]);
 
-        Assert.Equal(KeywordType.Var, ((Keyword)tokens[7]).Type);
-        Assert.Equal("x", ((Identifier)tokens[8]).Name);
-        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[9]).Type);
+        Assert.Equal(KeywordType.Var, ((Keyword)tokens[9]).Type);
+        Assert.Equal("x", ((Identifier)tokens[10]).Name);
+        Assert.Equal(SymbolType.Colon, ((Symbol)tokens[11]).Type);
 
-        Assert.Equal(3, ((Integer)tokens[10]).Value);
-        Assert.Equal(SymbolType.Dot, ((Symbol)tokens[11]).Type);
+        Assert.Equal(3, ((Integer)tokens[12]).Value);
+        Assert.Equal(SymbolType.Dot, ((Symbol)tokens[13]).Type);
 
-        Assert.Equal("Add", ((Identifier)tokens[12]).Name);
-        Assert.Equal(SymbolType.LP, ((Symbol)tokens[13]).Type);
-        Assert.Equal(5.8, ((Real)tokens[14]).Value);
-        Assert.Equal(SymbolType.Comma, ((Symbol)tokens[15]).Type);
-        Assert.Equal(0, ((Integer)tokens[16]).Value);
-        Assert.Equal(SymbolType.RP, ((Symbol)tokens[17]).Type);
+        Assert.Equal("Add", ((Identifier)tokens[14]).Name);
+        Assert.Equal(SymbolType.LP, ((Symbol)tokens[15]).Type);
+        Assert.Equal(5.8, ((Real)tokens[16]).Value);
+        Assert.Equal(SymbolType.Comma, ((Symbol)tokens[17]).Type);
+        Assert.Equal(0, ((Integer)tokens[18]).Value);
+        Assert.Equal(SymbolType.RP, ((Symbol)tokens[19]).Type);
+        Assert.IsType<NewLine>(tokens[20]);
 
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[18]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[21]).Type);
+        Assert.IsType<NewLine>(tokens[22]);
 
-        Assert.Equal(KeywordType.End, ((Keyword)tokens[19]).Type);
+        Assert.Equal(KeywordType.End, ((Keyword)tokens[23]).Type);
+    }
+}
+
+public class ExtendedLexer
+{
+
+    private static SuperLexer Instance() => new();
+
+    [Fact]
+    public void Easy()
+    {
+        Comparator.Compare(
+            R.P(
+                R.L(R.While, R.True, R.Loop),
+                R.L(R.Ident("Smth"), R.Dot, R.Ident("Test"), R.LP, R.RP, R.SC),
+                R.L(R.Ident("Smth"), R.Dot, R.Ident("MoreTest"), R.LP, R.RP, R.SC),
+                R.L(R.End, R.SC)
+            ),
+            Instance().Feed(
+                R.Text(
+                    """
+                    while true loop
+                        Smth.Test()
+                        Smth.MoreTest()
+                    end
+                    """
+                )
+            )
+        );
+    }
+
+    [Fact]
+    public void ClassesNMethods()
+    {
+        Comparator.Compare(
+            R.P(
+                R.L(R.Cls, R.Ident("A"), R.Is),
+                R.L(R.Method, R.Ident("X"), R.LP, R.RP, R.Is, R.End, R.SC),
+                R.L(R.Method, R.Ident("X"), R.LP, R.RP, R.Is, R.End, R.SC),
+                R.L(R.End, R.SC),
+
+                R.L(R.Cls, R.Ident("B"), R.Is),
+                R.L(R.End, R.SC),
+
+                R.L(R.Cls, R.Ident("C"), R.Is),
+                R.L(R.End, R.SC)
+            ),
+            Instance().Feed(
+                R.Text(
+                    """
+                    class A is
+                        method X() is end
+                        method X() is 
+                        end
+                    end
+                    class B is end
+                    class C is
+                    end
+                    """
+                )
+            )
+        );
+    }
+
+    [Fact]
+    public void HardStatement()
+    {
+        Comparator.Compare(
+            R.P(
+                R.L(R.While, R.True, R.Loop),
+                R.L(R.Ident("Console"), R.Dot, R.Ident("WriteLine")),
+                R.L(R.LP),
+                R.L(R.Ident("X"), R.Dot, R.Ident("Add")),
+                R.L(R.LP),
+                R.L(R.Ident("Y"), R.CM, R.Ident("X")),
+                R.L(R.RP),
+                R.L(R.RP),
+                R.L(R.SC),
+                R.L(R.Ident("I"), R.Dot, R.Ident("Am"), R.SC),
+                R.L(R.End, R.SC)
+            ),
+            Instance().Feed(
+                R.Text(
+                    """
+                    while
+                                true
+                         loop
+                      Console
+                        .
+                            WriteLine
+                                ( 
+                                    X
+                      .
+                            Add 
+                              (  
+
+                                Y
+
+                     ,
+                                          X
+                              )
+                                )
+
+                     I.Am
+                                            end
+                    """
+                )
+            )
+        );
     }
 }

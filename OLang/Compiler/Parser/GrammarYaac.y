@@ -1,6 +1,6 @@
 /* For some reason the constructor does not generate itself */
 %{
-    public Parser(AbstractScanner<INode, LexLocation> scanner) : base(scanner) { }
+    public Parser(AbstractScanner<Node, Position> scanner) : base(scanner) { }
 %}
 
 %output = Parser.Generated.cs
@@ -12,9 +12,10 @@
 %scanbasetype BaseScanner
 %tokentype TokenType
 
-%using OLang.Compiler.Lexer.Tokens
+%using OLang.Compiler.Overall
 
-%YYSTYPE INode
+%YYSTYPE Node
+%YYLTYPE Position
 
 %start Program
 
@@ -56,16 +57,16 @@
 %%
 
 Program
-    : ClassDeclarations { $$ = CreateProgram($1); }
+    : ClassDeclarations { $$ = CreateProgram(@$, $1); }
     ;
 
 ClassDeclarations
-    : { $$ = CreateNewList(); }
-    | ClassDeclarations ClassDeclaration { AddToList($$, $2); $$ = $1; }
+    : { $$ = CreateNewList(@$); }
+    | ClassDeclarations ClassDeclaration { AddToList(@$, $$, $2); $$ = $1; }
     ;
 
 ClassDeclaration
-    : CLASS ClassName Extends IS MemberDeclarations END SEMICOLON { $$ = CreateClass($2, $3, $5); }
+    : CLASS ClassName Extends IS MemberDeclarations END SEMICOLON { $$ = CreateClass(@$, $2, $3, $5); }
     ;
 
 Extends
@@ -74,12 +75,12 @@ Extends
     ;
 
 MemberDeclarations
-    : { $$ = CreateNewList(); }
-    | MemberDeclarations MemberDeclaration SEMICOLON { AddToList($$, $2); $$ = $1; }
+    : { $$ = CreateNewList(@$); }
+    | MemberDeclarations MemberDeclaration SEMICOLON { AddToList(@$, $$, $2); $$ = $1; }
     ;
 
 ClassName
-    : IDENTIFIER GenericParameter { $$ = CreateClassName($1, $2); }
+    : IDENTIFIER GenericParameter { $$ = CreateClassName(@$, $1, $2); }
     ;
     
 GenericParameter
@@ -96,32 +97,32 @@ MemberDeclaration
     ;
 
 FieldDeclaration
-    : FIELD IDENTIFIER COLON ClassName IS Expression { $$ = CreateField($2, $4, $6); }
+    : FIELD IDENTIFIER COLON ClassName IS Expression { $$ = CreateField(@$, $2, $4, $6); }
     ;
 
 StaticDeclaration
-    : STATIC IDENTIFIER COLON IDENTIFIER IS Expression { $$ = CreateStaticField($2, $4, $6); }
+    : STATIC IDENTIFIER COLON IDENTIFIER IS Expression { $$ = CreateStaticField(@$, $2, $4, $6); }
     ;
 
 ConstructorDeclaration
-    : THIS LPARENT Parameters RPARENT IS Body END { $$ = CreateConstructor($3, $6); }
+    : THIS LPARENT Parameters RPARENT IS Body END { $$ = CreateConstructor(@$, $3, $6); }
     ;
 
 MethodDeclaration
-    : METHOD IDENTIFIER LPARENT Parameters RPARENT SpecifyingType IS Body END { $$ = CreateMethod($2, $4, $6, $8); }
+    : METHOD IDENTIFIER LPARENT Parameters RPARENT SpecifyingType IS Body END { $$ = CreateMethod(@$, $2, $4, $6, $8); }
     ;
 
 FunctionDeclaration
-    : FUNCTION IDENTIFIER LPARENT Parameters RPARENT SpecifyingType IS Body END { $$ = CreateFunction($2, $4, $6, $8); }
+    : FUNCTION IDENTIFIER LPARENT Parameters RPARENT SpecifyingType IS Body END { $$ = CreateFunction(@$, $2, $4, $6, $8); }
     ;
 
 Parameters
-    : { $$ = CreateNewList(); }
-    | Parameters COMMA ParameterDeclaration { AddToList($$, $2); $$ = $1; }
+    : { $$ = CreateNewList(@$); }
+    | Parameters COMMA ParameterDeclaration { AddToList(@$, $$, $2); $$ = $1; }
     ;
 
 ParameterDeclaration
-    : IDENTIFIER COLON ClassName { $$ = CreateParameter($1, $3); }
+    : IDENTIFIER COLON ClassName { $$ = CreateParameter(@$, $1, $3); }
     ;
 
 Body
@@ -129,7 +130,7 @@ Body
     ;
 
 VariableDeclaration
-    : LET IDENTIFIER SpecifyingType ASAN Expression { $$ = CreateVariable($2, $3, $5); }
+    : LET IDENTIFIER SpecifyingType ASAN Expression { $$ = CreateVariable(@$, $2, $3, $5); }
     ;
 
 SpecifyingType
@@ -138,8 +139,8 @@ SpecifyingType
     ;
 
 Statements
-    : { $$ = CreateNewList(); }
-    | Statements Statement SEMICOLON { AddToList($$, $2); $$ = $1; }
+    : { $$ = CreateNewList(@$); }
+    | Statements Statement SEMICOLON { AddToList(@$, $$, $2); $$ = $1; }
     ;
 
 Statement
@@ -152,15 +153,15 @@ Statement
     ;
 
 Assignment
-    : IDENTIFIER ASAN Expression { $$ = CreateAssigment($1, $3); }
+    : IDENTIFIER ASAN Expression { $$ = CreateAssigment(@$, $1, $3); }
     ;
 
 WhileLoop
-    : WHILE Expression LOOP Body END { $$ = CreateWhileLoop($2, $4); }
+    : WHILE Expression LOOP Body END { $$ = CreateWhileLoop(@$, $2, $4); }
     ;
 
 IfStatement
-    : IF Expression THEN Body ElseTail END { $$ = CreateIfStatement($2, $4, $5); }
+    : IF Expression THEN Body ElseTail END { $$ = CreateIfStatement(@$, $2, $4, $5); }
     ;
 
 ElseTail
@@ -168,10 +169,9 @@ ElseTail
     | ELSE Body { $$ = $2; }
     ;
 
-// TODO: мейби вынести, как на паре показывали (но хочется посмотреть самому на конфликты)
 ReturnStatement
-    : RETURN { $$ = CreateReturn(null); }
-    | RETURN Expression { $$ = CreateReturn($2); }
+    : RETURN { $$ = CreateReturn(@$, null); }
+    | RETURN Expression { $$ = CreateReturn(@$, $2); }
     ;
 
 Expression
@@ -182,24 +182,23 @@ Expression
     ;
 
 ConstructorInvocation
-    : ClassName LPARENT Arguments RPARENT { $$ = CreateConstructorInvocation($1, $3); }
+    : ClassName LPARENT Arguments RPARENT { $$ = CreateConstructorInvocation(@$, $1, $3); }
     ;
 
 MethodCall
-    : Expression DOT IDENTIFIER LPARENT Arguments RPARENT { $$ = CreateMethodCall($1, $3, $5); }
+    : Expression DOT IDENTIFIER LPARENT Arguments RPARENT { $$ = CreateMethodCall(@$, $1, $3, $5); }
     ;
 
 ValueGetting
-    : Expression DOT IDENTIFIER { $$ = CreateValueGetting($1, $3); }
+    : Expression DOT IDENTIFIER { $$ = CreateValueGetting(@$, $1, $3); }
     ;
 
 Arguments
-    : { $$ = CreateNewList(); }
-    | Expression { $$ = CreateNewList($1); }
-    | Arguments COMMA Expression { AddToList($$, $3); $$ = $1; }
+    : { $$ = CreateNewList(@$); }
+    | Expression { $$ = CreateNewList(@$, $1); }
+    | Arguments COMMA Expression { AddToList(@$, $$, $3); $$ = $1; }
     ;
 
-// TODO: не знаю, что нужны ли Scanner.yylval -- надо будет проверить
 Primary
     : INTEGER
     | REAL

@@ -1,11 +1,12 @@
 
 using OLang.Compiler.Lexer.Tokens;
+using OLang.Compiler.Overall;
 
 namespace OLang.Compiler.Lexer;
 
 internal class SuperLexer : ILexer
 {
-    private readonly static HashSet<KeywordType> _afterKeywords = [
+    private static readonly HashSet<KeywordType> _afterKeywords = [
         KeywordType.Class,
         KeywordType.Extends,
         KeywordType.Is,
@@ -47,14 +48,9 @@ internal class SuperLexer : ILexer
         SymbolType.Colon
     ];
 
-    private static Span MakeSpanAfter(Span? span)
+    private static Position MakeSpanAfter(Position? span)
     {
-        if (span.HasValue)
-        {
-            var s = span.Value;
-            return new(s.LineNumber, s.EndPosition, s.EndPosition);
-        }
-        return new(0, 0, 0);
+        return span ?? new Position(0, 0, 0, 0);
     }
 
     private static bool ShouldNotAddSemicolonAfterToken(Token? token)
@@ -98,7 +94,7 @@ internal class SuperLexer : ILexer
             {
                 if (!(ShouldNotAddSemicolonAfterToken(prev) || ShouldNotAddSemicolonBeforeToken(token)))
                 {
-                    yield return new Symbol(";", SymbolType.Semicolon, MakeSpanAfter(prev?.Span)); ;
+                    yield return new Symbol(";", SymbolType.Semicolon, MakeSpanAfter(prev?.Position)); ;
                 }
                 hadNewLine = false;
             }
@@ -108,7 +104,7 @@ internal class SuperLexer : ILexer
 
         if (!ShouldNotAddSemicolonAfterToken(prev))
         {
-            yield return new Symbol(";", SymbolType.Semicolon, MakeSpanAfter(prev?.Span));
+            yield return new Symbol(";", SymbolType.Semicolon, MakeSpanAfter(prev?.Position));
         }
     }
 }

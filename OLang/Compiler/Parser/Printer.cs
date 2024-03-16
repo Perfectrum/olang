@@ -35,20 +35,20 @@ public static class Printer
                 Visit(field.Type);
             
             Append($"{field.Name} = ");
-            field.Expression.Visit(this);
+            field.Expression.Accept(this);
         }
 
         public void Visit(Constructor constructor)
         {
             Append("this ");
             AppendCollectionWithoutTab(constructor.Parameters, Visit);
-            AppendCollectionWithTab(constructor.Body, node => node.Visit(this));
+            AppendCollectionWithTab(constructor.Body, node => node.Accept(this));
         }
 
         public void Visit(Method method)
         {
             Append($"{(method.IsStatic ? "static" : "")} method {method.Name}, ");
-            AppendCollectionWithTab(method.Body, node => node.Visit(this));
+            AppendCollectionWithTab(method.Body, node => node.Accept(this));
             AppendCollectionWithoutTab(method.Parameters, Visit);
         }
 
@@ -62,7 +62,7 @@ public static class Printer
                 Visit(@class.Extends);
             }
             
-            AppendCollectionWithTab(@class.Members, node => node.Visit(this));
+            AppendCollectionWithTab(@class.Members, node => node.Accept(this));
         }
 
         public void Visit(ClassName className)
@@ -79,14 +79,14 @@ public static class Printer
         public void Visit(IfStatement ifStatement)
         {
             Append("if (");
-            ifStatement.Condition.Visit(this);
+            ifStatement.Condition.Accept(this);
             Append(")");
-            AppendCollectionWithTab(ifStatement.TrueBlock, node => node.Visit(this));
+            AppendCollectionWithTab(ifStatement.TrueBlock, node => node.Accept(this));
             if (ifStatement.FalseBlock is not null)
             {
                 _builder.AppendLine();
                 AppendWithTabs("else");
-                AppendCollectionWithTab(ifStatement.FalseBlock, node => node.Visit(this));
+                AppendCollectionWithTab(ifStatement.FalseBlock, node => node.Accept(this));
             }
         }
 
@@ -98,20 +98,20 @@ public static class Printer
                 Visit(variable.Type);
             
             Append($" {variable.Name} = ");
-            variable.Expression.Visit(this);
+            variable.Expression.Accept(this);
         }
 
         public void Visit(Assigment assigment)
         {
             Append($"{assigment.VariableName} = ");
-            assigment.Expression.Visit(this);
+            assigment.Expression.Accept(this);
         }
 
         public void Visit(WhileLoop whileLoop)
         {
             Append("while ");
-            whileLoop.Condition.Visit(this);
-            AppendCollectionWithTab(whileLoop.Body, node => node.Visit(this));
+            whileLoop.Condition.Accept(this);
+            AppendCollectionWithTab(whileLoop.Body, node => node.Accept(this));
         }
 
         public void Visit(ReturnStatement returnStatement)
@@ -121,33 +121,33 @@ public static class Printer
                 return;
             
             Append(" ");
-            returnStatement.Expression.Visit(this);
+            returnStatement.Expression.Accept(this);
         }
 
         public void Visit(ConstructorInvocation constructorInvocation)
         {
             Append("new ");
             Visit(constructorInvocation.ClassName);
-            AppendCollectionWithoutTab(constructorInvocation.Arguments, node => node.Visit(this));
+            AppendCollectionWithoutTab(constructorInvocation.Arguments, node => node.Accept(this));
         }
 
         public void Visit(MethodCall methodCall)
         {
-            methodCall.Expression.Visit(this);
+            methodCall.Expression.Accept(this);
             Append($".{methodCall.MethodName}");
-            AppendCollectionWithoutTab(methodCall.Arguments, node => node.Visit(this));
+            AppendCollectionWithoutTab(methodCall.Arguments, node => node.Accept(this));
         }
 
         public void Visit(ValueGetting valueGetting)
         {
-            valueGetting.Expression.Visit(this);
+            valueGetting.Expression.Accept(this);
             Append($".{valueGetting.FieldName}");
         }
 
-        public void Visit<T>(ValueNode<T> valueNode) => Append(valueNode.Value.ToString());
+        public void Visit<T>(ValueNode<T> valueNode) => Append(valueNode.Value!.ToString());
 
         private void AppendCollectionWithTab<T>(
-            IEnumerable<T> collection, Action<T> actionOnNode) where T : INode
+            IEnumerable<T> collection, Action<T> actionOnNode) where T : Node
         {
             Append(" {");
             _builder.AppendLine();
@@ -163,7 +163,7 @@ public static class Printer
         }
         
         private void AppendCollectionWithoutTab<T>(
-            IEnumerable<T> collection, Action<T> actionOnNode) where T : INode
+            IEnumerable<T> collection, Action<T> actionOnNode) where T : Node
         {
             Append("(");
             ++_tabIndex;
@@ -180,7 +180,7 @@ public static class Printer
 
         private void AppendTabs() => _builder.Append(' ', _tabIndex * 4);
         
-        private void Append(string str) => _builder.Append(str);
+        private void Append(string? str) => _builder.Append(str);
         private void AppendWithTabs(string str)
         {
             AppendTabs();

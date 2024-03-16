@@ -1,17 +1,15 @@
 ﻿using OLang.Compiler.Lexer.Tokens;
-using QUT.Gppg;
 
 namespace OLang.Compiler.Parser;
 
-internal class Scanner(IEnumerable<Token> tokens, StreamWriter errorStream) : BaseScanner
+internal class Scanner(IEnumerable<Token> tokens, TextWriter _errorStream) : BaseScanner
 {
     private readonly IEnumerator<Token> _tokens = tokens.GetEnumerator();
-    private readonly StreamWriter _errorStream = errorStream;
 
     public override void yyerror(string format, params object[] args)
     {
         _errorStream.Write(format, args);
-        _errorStream.WriteLine($": {yylloc.StartLine}-{yylloc.EndLine}:{yylloc.StartColumn}-{yylloc.EndColumn}");
+        _errorStream.WriteLine($": {yylloc}");
     }
 
     public override int yylex()
@@ -23,19 +21,15 @@ internal class Scanner(IEnumerable<Token> tokens, StreamWriter errorStream) : Ba
 
         yylval = token switch
         {
-            BooleanLiteral booleanLiteral => new ValueNode<bool>(booleanLiteral.Value),
-            Identifier identifier => new ValueNode<string>(identifier.Name),
-            Integer integer => new ValueNode<int>(integer.Value),
-            Real real => new ValueNode<double>(real.Value),
-            StringLiteral stringLiteral => new ValueNode<string>(stringLiteral.Text),
+            BooleanLiteral booleanLiteral => new ValueNode<bool>(token.Position, booleanLiteral.Value),
+            Identifier identifier => new ValueNode<string>(token.Position, identifier.Name),
+            Integer integer => new ValueNode<int>(token.Position, integer.Value),
+            Real real => new ValueNode<double>(token.Position, real.Value),
+            StringLiteral stringLiteral => new ValueNode<string>(token.Position, stringLiteral.Text),
             _ => null
         };
 
-        // TODO: мейби легче подсунуть наш Span и реализовать просто IMerge?
-        yylloc = new LexLocation(
-            (int)token.Span.LineNumber, (int)token.Span.LineNumber,
-            token.Span.BeginPosition, token.Span.EndPosition
-        );
+        yylloc = token.Position;
         
         return (int)(token switch
         {
@@ -72,6 +66,10 @@ internal class Scanner(IEnumerable<Token> tokens, StreamWriter errorStream) : Ba
                 KeywordType.If => TokenType.IF,
                 KeywordType.Then => TokenType.THEN,
                 KeywordType.Else => TokenType.ELSE,
+                KeywordType.Super => TokenType.SUPER,
+                KeywordType.Static => TokenType.STATIC,
+                KeywordType.Field => TokenType.FIELD,
+                KeywordType.Function => TokenType.FUNCTION,
                 _ => throw new ArgumentOutOfRangeException()
             },
             _ => throw new ArgumentOutOfRangeException()

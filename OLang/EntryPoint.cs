@@ -14,7 +14,7 @@ using var sourceFile = File.OpenRead(pathToSourceCode);
 var lex = new SuperLexer();
 var tokensStream = lex.Feed(sourceFile);
 
-using var errorStream = new StreamWriter(Console.OpenStandardOutput());
+using var errorStream = new StreamWriter(Console.OpenStandardError());
 using var outputStream = new StreamWriter(Console.OpenStandardOutput());
 
 var parser = new Parser(new Scanner(tokensStream, errorStream));

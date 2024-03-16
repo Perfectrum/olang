@@ -1,20 +1,22 @@
+using OLang.Compiler.Overall;
+
 namespace OLang.Compiler.Lexer.Tokens;
 
-public abstract record Token(Span Span);
+public abstract record Token(Position Position);
 
-public record NewLine(Span Span) : Token(Span);
+public record NewLine(Position Position) : Token(Position);
 
-public record Identifier(string Name, Span Span) : Token(Span);
+public record Identifier(string Name, Position Position) : Token(Position);
 
-public record StringLiteral(string Text, Span Span) : Token(Span);
+public record StringLiteral(string Text, Position Position) : Token(Position);
 
-public record BooleanLiteral(bool Value, Span Span) : Token(Span);
+public record BooleanLiteral(bool Value, Position Position) : Token(Position);
 
-public record Integer(int Value, Span Span) : Token(Span);
+public record Integer(int Value, Position Position) : Token(Position);
 
-public record Real(double Value, Span Span) : Token(Span);
+public record Real(double Value, Position Position) : Token(Position);
 
-public record Keyword(KeywordType Type, Span Span) : Token(Span);
+public record Keyword(KeywordType Type, Position Position) : Token(Position);
 
 public enum KeywordType
 {
@@ -42,7 +44,7 @@ public enum KeywordType
     Function
 }
 
-public record Symbol(string Text, SymbolType Type, Span Span) : Token(Span);
+public record Symbol(string Text, SymbolType Type, Position Position) : Token(Position);
 
 public enum SymbolType
 {

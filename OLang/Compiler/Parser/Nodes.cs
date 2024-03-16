@@ -1,11 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using OLang.Compiler.Overall;
 
 namespace OLang.Compiler.Parser;
 
-using Parameters = ReadOnlyCollection<Parameter>;
-using Body = ReadOnlyCollection<Statement>;
-using Members = ReadOnlyCollection<MemberDeclaration>;
-using Arguments = ReadOnlyCollection<Expression>;
+using Classes = List<Class>;
+using Parameters = List<Parameter>;
+using Body = List<Statement>;
+using Members = List<MemberDeclaration>;
+using Arguments = List<Expression>;
 
 public interface IStatementVisitor
 {
@@ -28,146 +29,225 @@ public interface IMemberDeclarationVisitor
     void Visit(Method method);
 }
 
-internal record TemporaryListNode(List<INode> Nodes) : INode
+internal class TemporaryListNode(Position position, List<Node> nodes) : Node(position)
 {
-    // TODO: мейби можно придумать без вызова .Cast<T>().ToArray(), чтобы память лишнюю не выделять, но пока так
-    public ReadOnlyCollection<T> Collect<T>() => Nodes.Cast<T>().ToArray().AsReadOnly();
+    public List<Node> Nodes { get; } = nodes;
 }
 
-public interface INode;
-
-public record Program(ReadOnlyCollection<Class> Classes) : INode;
-
-public abstract record MemberDeclaration : INode
+public abstract class Node(Position position)
 {
-    public abstract void Visit(IMemberDeclarationVisitor visitor);
+    public Position Position { get; set; } = position;
 }
 
-public record Parameter(
-    string Name,
-    ClassName Type
-) : INode;
+public class Program(Position position, Classes classes) : Node(position)
+{
+    public Classes Classes { get; } = classes;
+}
 
-public record Field(
+public abstract class MemberDeclaration(Position position) : Node(position)
+{
+    public abstract void Accept(IMemberDeclarationVisitor visitor);
+}
+
+public class Parameter(
+    Position position,
+    string name,
+    ClassName type
+) : Node(position)
+{
+    public string Name { get; set; } = name;
+    public ClassName Type { get; set; } = type;
+}
+
+public class Field(
+    Position position,
     // TODO: не уверен, что будет удобно
-    bool IsStatic,
-    string Name,
-    ClassName? Type,
-    Expression Expression
-) : MemberDeclaration
+    bool isStatic,
+    string name,
+    ClassName? type,
+    Expression expression
+) : MemberDeclaration(position)
 {
-    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+    public bool IsStatic { get; set; } = isStatic;
+    public string Name { get; set; } = name;
+    public ClassName? Type { get; set; } = type;
+    public Expression Expression { get; set; } = expression;
+    
+    public override void Accept(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
 }
 
-public record Constructor(
-    Parameters Parameters,
-    Body Body
-) : MemberDeclaration
+public class Constructor(
+    Position position,
+    Parameters parameters,
+    Body body
+) : MemberDeclaration(position)
 {
-    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+    public Parameters Parameters { get; } = parameters;
+    public Body Body { get; } = body;
+    
+    public override void Accept(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
 }
 
-public record Method(
+public class Method(
+    Position position,
     // TODO: тоже не уверен, что будет удобно
-    bool IsStatic,
-    string Name,
-    Parameters Parameters,
-    ClassName? ReturnType,
-    Body Body
-) : MemberDeclaration
+    bool isStatic,
+    string name,
+    Parameters parameters,
+    ClassName? returnType,
+    Body body
+) : MemberDeclaration(position)
 {
-    public override void Visit(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
+    public bool IsStatic { get; set; } = isStatic;
+    public string Name { get; set; } = name;
+    public Parameters Parameters { get; } = parameters;
+    public ClassName? ReturnType { get; set; } = returnType;
+    public Body Body { get; } = body;
+
+    public override void Accept(IMemberDeclarationVisitor visitor) => visitor.Visit(this);
 }
 
-public record Class(
-    ClassName Name,
-    ClassName? Extends,
-    Members Members
-) : INode;
-
-public abstract record Statement : INode
+public class Class(
+    Position position,
+    ClassName name,
+    ClassName? extends,
+    Members members
+) : Node(position)
 {
-    public abstract void Visit(IStatementVisitor visitor);
+    public ClassName Name { get; set; } = name;
+    public ClassName? Extends { get; set; } = extends;
+    public Members Members { get; set; } = members;
 }
 
-public record Assigment(
-    string VariableName,
-    Expression Expression
-) : Statement
+public abstract class Statement(Position position) : Node(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public abstract void Accept(IStatementVisitor visitor);
 }
 
-public record WhileLoop(
-    Expression Condition,
-    Body Body
-) : Statement
+public class Assigment(
+    Position position,
+    string variableName,
+    Expression expression
+) : Statement(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public string VariableName { get; set; } = variableName;
+    public Expression Expression { get; set; } = expression;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record IfStatement(
-    Expression Condition,
-    Body TrueBlock,
-    Body? FalseBlock
-) : Expression
+public class WhileLoop(
+    Position position,
+    Expression condition,
+    Body body
+) : Statement(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public Expression Condition { get; set; } = condition;
+    public Body Body { get; set; } = body;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record ReturnStatement(
-    Expression? Expression
-) : Statement
+public class IfStatement(
+    Position position,
+    Expression condition,
+    Body trueBlock,
+    Body? falseBlock
+) : Expression(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public Expression Condition { get; set; } = condition;
+    public Body TrueBlock { get; set; } = trueBlock;
+    public Body? FalseBlock { get; set; } = falseBlock;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record Variable(
-    string Name,
-    ClassName? Type,
-    Expression Expression
-) : Statement
+public class ReturnStatement(
+    Position position,
+    Expression? expression
+) : Statement(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public Expression? Expression { get; set; } = expression;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public abstract record Expression : Statement;
-
-public record ConstructorInvocation(
-    ClassName ClassName,
-    Arguments Arguments
-) : Expression
+public class Variable(
+    Position position,
+    string name,
+    ClassName? type,
+    Expression expression
+) : Statement(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public string Name { get; set; } = name;
+    public ClassName? Type { get; set; } = type;
+    public Expression Expression { get; set; } = expression;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record MethodCall(
-    Expression Expression,
-    string MethodName,
-    Arguments Arguments
-) : Expression
+public abstract class Expression(
+    Position position
+) : Statement(position);
+
+public class ConstructorInvocation(
+    Position position,
+    ClassName className,
+    Arguments arguments
+) : Expression(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public ClassName ClassName { get; set; } = className;
+    public Arguments Arguments { get; set; } = arguments;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record ValueGetting(
-    Expression Expression,
-    string FieldName
-) : Expression
+public class MethodCall(
+    Position position,
+    Expression expression,
+    string methodName,
+    Arguments arguments
+) : Expression(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public Expression Expression { get; set; } = expression;
+    public string MethodName { get; set; } = methodName;
+    public Arguments Arguments { get; set; } = arguments;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-// TODO: мейби можно переделать на явные int, string и т. д.
-public record ValueNode<T>(T Value) : Expression
+public class ValueGetting(
+    Position position,
+    Expression expression,
+    string fieldName
+) : Expression(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public Expression Expression { get; set; } = expression;
+    public string FieldName { get; set; } = fieldName;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-public record ClassName(
-    string Name,
-    ClassName? GenericArgument
-) : Expression
+// TODO: мейби можно переделать на явные int, string, Identifier и т. д.
+public class ValueNode<T>(
+    Position position,
+    T value
+) : Expression(position)
 {
-    public override void Visit(IStatementVisitor visitor) => visitor.Visit(this);
+    public T Value { get; } = value;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+
+public class ClassName(
+    Position position,
+    string name,
+    ClassName? genericArgument
+) : Expression(position)
+{
+    public string Name { get; set; } = name;
+    public ClassName? GenericArgument { get; set; } = genericArgument;
+    
+    public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }

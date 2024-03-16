@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using OLang.Compiler.Lexer.Tokens;
+using OLang.Compiler.Overall;
 
 namespace OLang.Compiler.Lexer;
 
@@ -65,7 +66,7 @@ internal class BasicLexer : ILexer
 
     private char Current => _currentChar;
 
-    private Span CurrentSpan => new(_line, _column, _column + 1);
+    private Position CurrentPosition => new(_line, _line, _column, _column + 1);
 
     private void Switch(SwitchParameters parameters)
     {
@@ -103,11 +104,11 @@ internal class BasicLexer : ILexer
         return word;
     }
 
-    private Span GetSpan(int endFix = 0, int startFix = 0)
+    private Position GetSpan(int endFix = 0, int startFix = 0)
     {
 
         var loc = GetLastLocation();
-        return new Span(_line, (loc?.Column ?? 0) + startFix, _column + endFix);
+        return new Position(_line, _line, (loc?.Column ?? 0) + startFix, _column + endFix);
     }
 
     ///////////////////////////////////////////////////////////
@@ -178,7 +179,7 @@ internal class BasicLexer : ILexer
     {
         if (IsCurrentNewLine())
         {
-            Yield(new NewLine(CurrentSpan));
+            Yield(new NewLine(CurrentPosition));
             NewLine();
             return null;
         }
@@ -209,7 +210,7 @@ internal class BasicLexer : ILexer
         };
 
         if (symbolType.HasValue)
-            Yield(new Symbol(Current.ToString(), symbolType.Value, CurrentSpan));
+            Yield(new Symbol(Current.ToString(), symbolType.Value, CurrentPosition));
 
         return null;
     }
@@ -246,9 +247,9 @@ internal class BasicLexer : ILexer
 
         Yield(new Integer(number, GetSpan(-1)));
 
-        var dotSpan = CurrentSpan;
-        dotSpan.BeginPosition -= 1;
-        dotSpan.EndPosition -= 1;
+        var dotSpan = CurrentPosition;
+        dotSpan.BeginColumn -= 1;
+        dotSpan.EndColumn -= 1;
 
         Yield(new Symbol(".", SymbolType.Dot, dotSpan));
         return new SwitchParameters(Mode.BASIC);

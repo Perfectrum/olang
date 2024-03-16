@@ -1,82 +1,86 @@
-﻿using System.Collections.ObjectModel;
+﻿using OLang.Compiler.Overall;
 
 namespace OLang.Compiler.Parser;
 
 internal partial class Parser
 {
-    public INode EndNode => CurrentSemanticValue;
+    public Program EndNode => (Program) CurrentSemanticValue;
 
     #region Lists
 
-    private TemporaryListNode CreateNewList(INode firstElement) =>
-        new([firstElement]);
+    private TemporaryListNode CreateNewList(Position position, Node firstElement) =>
+        new(position, [firstElement]);
 
-    private TemporaryListNode CreateNewList() =>
-        new([]);
+    private TemporaryListNode CreateNewList(Position position) =>
+        new(position, []);
 
-    private void AddToList(INode list, INode element) =>
+    private void AddToList(Position position, Node list, Node element)
+    {
+        var listNode = ((TemporaryListNode)list);
+        listNode.Position = position;
         ((TemporaryListNode)list).Nodes.Add(element);
+    }
 
-    private static ReadOnlyCollection<T> ListNodeToReadOnlyArray<T>(INode node) =>
-        ((TemporaryListNode)node).Collect<T>();
+    private static List<T> ListNodeToList<T>(Node node) =>
+        ((TemporaryListNode)node).Nodes.Cast<T>().ToList();
 
-    private static T GetValueFromNode<T>(INode node) =>
+    private static T GetValueFromNode<T>(Node node) =>
         ((ValueNode<T>)node).Value;
 
     #endregion
 
-    private Program CreateProgram(INode classes) =>
-        new(ListNodeToReadOnlyArray<Class>(classes));
+    private static Program CreateProgram(Position position, Node classes) =>
+        new(position, ListNodeToList<Class>(classes));
 
-    private Class CreateClass(INode className, INode? extends, INode members) =>
-        new((ClassName)className, (ClassName?)extends, ListNodeToReadOnlyArray<MemberDeclaration>(members));
+    private static Class CreateClass(Position position, Node className, Node? extends, Node members) =>
+        new(position, (ClassName)className, (ClassName?)extends, ListNodeToList<MemberDeclaration>(members));
 
-    private ClassName CreateClassName(INode name, INode? genericArgument) =>
-        new(((ValueNode<string>)name).Value, (ClassName?)genericArgument);
+    private static ClassName CreateClassName(Position position, Node name, Node? genericArgument) =>
+        new(position, ((ValueNode<string>)name).Value, (ClassName?)genericArgument);
     
-    private Parameter CreateParameter(INode name, INode type) =>
-        new(((ValueNode<string>)name).Value, (ClassName)type);
+    private static Parameter CreateParameter(Position position, Node name, Node type) =>
+        new(position, ((ValueNode<string>)name).Value, (ClassName)type);
 
-    private Field CreateField(INode name, INode? type, INode expression) =>
-        new(false, GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
+    private static Field CreateField(Position position, Node name, Node? type, Node expression) =>
+        new(position, false, GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
 
-    private Field CreateStaticField(INode name, INode? type, INode expression) =>
-        new(true, GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
+    private static Field CreateStaticField(Position position, Node name, Node? type, Node expression) =>
+        new(position, true, GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
 
-    private Constructor CreateConstructor(INode parameters, INode body) =>
-        new(ListNodeToReadOnlyArray<Parameter>(parameters), ListNodeToReadOnlyArray<Statement>(body));
+    private static Constructor CreateConstructor(Position position, Node parameters, Node body) =>
+        new(position, ListNodeToList<Parameter>(parameters), ListNodeToList<Statement>(body));
 
-    private Method CreateMethod(INode name, INode parameters, INode? type, INode body) =>
-        new(false, GetValueFromNode<string>(name), ListNodeToReadOnlyArray<Parameter>(parameters),
-            (ClassName?)type, ListNodeToReadOnlyArray<Statement>(body));
+    private static Method CreateMethod(Position position, Node name, Node parameters, Node? type, Node body) =>
+        new(position, false, GetValueFromNode<string>(name), ListNodeToList<Parameter>(parameters),
+            (ClassName?)type, ListNodeToList<Statement>(body));
     
-    private Method CreateFunction(INode name, INode parameters, INode? type, INode body) =>
-        new(true, GetValueFromNode<string>(name), ListNodeToReadOnlyArray<Parameter>(parameters),
-            (ClassName?)type, ListNodeToReadOnlyArray<Statement>(body));
+    private static Method CreateFunction(Position position, Node name, Node parameters, Node? type, Node body) =>
+        new(position, true, GetValueFromNode<string>(name), ListNodeToList<Parameter>(parameters),
+            (ClassName?)type, ListNodeToList<Statement>(body));
 
-    private Variable CreateVariable(INode name, INode? type, INode expression) =>
-        new(GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
+    private static Variable CreateVariable(Position position, Node name, Node? type, Node expression) =>
+        new(position, GetValueFromNode<string>(name), (ClassName?)type, (Expression)expression);
 
-    private Assigment CreateAssigment(INode variableName, INode expression) =>
-        new(GetValueFromNode<string>(variableName), (Expression)expression);
+    private static Assigment CreateAssigment(Position position, Node variableName, Node expression) =>
+        new(position, GetValueFromNode<string>(variableName), (Expression)expression);
 
-    private WhileLoop CreateWhileLoop(INode condition, INode body) =>
-        new((Expression)condition, ListNodeToReadOnlyArray<Statement>(body));
+    private static WhileLoop CreateWhileLoop(Position position, Node condition, Node body) =>
+        new(position, (Expression)condition, ListNodeToList<Statement>(body));
 
-    private ReturnStatement CreateReturn(INode? expression) =>
-        new((Expression?)expression);
+    private static ReturnStatement CreateReturn(Position position, Node? expression) =>
+        new(position, (Expression?)expression);
     
-    private IfStatement CreateIfStatement(INode expression, INode body, INode? elseBody) =>
-        new((Expression)expression, ListNodeToReadOnlyArray<Statement>(body),
-            ((TemporaryListNode?)elseBody)?.Collect<Statement>());
+    private static IfStatement CreateIfStatement(Position position, Node expression, Node body, Node? elseBody) =>
+        new(position, (Expression)expression, ListNodeToList<Statement>(body),
+            elseBody == null ? null : ListNodeToList<Statement>(elseBody));
 
-    private ConstructorInvocation CreateConstructorInvocation(INode className, INode arguments) =>
-        new((ClassName)className, ListNodeToReadOnlyArray<Expression>(arguments));
+    private static ConstructorInvocation CreateConstructorInvocation(Position position, Node className, Node arguments) =>
+        new(position, (ClassName)className, ListNodeToList<Expression>(arguments));
 
-    private MethodCall CreateMethodCall(INode expression, INode methodName, INode arguments) =>
-        new((Expression)expression, GetValueFromNode<string>(methodName),
-            ListNodeToReadOnlyArray<Expression>(arguments));
+    private static MethodCall CreateMethodCall(Position position, Node expression, Node methodName, Node arguments) =>
+        new(position, (Expression)expression, GetValueFromNode<string>(methodName),
+            ListNodeToList<Expression>(arguments));
     
-    private ValueGetting CreateValueGetting(INode expression, INode fieldName) =>
-        new((Expression)expression, GetValueFromNode<string>(fieldName));
+    private static ValueGetting CreateValueGetting(Position position, Node expression, Node fieldName) =>
+        new(position, (Expression)expression, GetValueFromNode<string>(fieldName));
 }

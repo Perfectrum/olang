@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using OLang.Compiler.Lexer;
 using OLang.Compiler.Parser;
 
@@ -19,6 +20,17 @@ using var outputStream = new StreamWriter(Console.OpenStandardOutput());
 
 var parser = new Parser(new Scanner(tokensStream, errorStream));
 if (parser.Parse() == false)
+{
     errorStream.WriteLine("Error Parsing");
+}
 else
-    Printer.Print((OLang.Compiler.Parser.Program)parser.EndNode, outputStream);
+{
+    outputStream.WriteLine("C style:");
+    Printer.Print(parser.EndNode, outputStream);
+    
+    outputStream.WriteLine();
+    outputStream.WriteLine("Json:");
+    var json = JsonConvert.SerializeObject(parser.EndNode, Formatting.Indented);
+    outputStream.WriteLine(json);
+}
+

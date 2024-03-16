@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="YaccLexTools.Gppg" Version="1.5.2.4"/>
     </ItemGroup>
 

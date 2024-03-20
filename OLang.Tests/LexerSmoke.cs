@@ -4,6 +4,7 @@ using System.Text;
 using OLang.Compiler.Lexer.Tokens;
 using System.Globalization;
 using OLang.Compiler.Lexer;
+using OLang.Compiler.Overall;
 
 namespace OLang.Tests;
 
@@ -18,7 +19,7 @@ public static class Comparator
             {
                 Assert.True(iter.MoveNext());
                 var b = iter.Current;
-                var a = token with { Span = b.Span };
+                var a = token with { Position = b.Position };
                 Assert.Equal(a, b);
             }
         }
@@ -28,7 +29,7 @@ public static class Comparator
 public static class R
 {
 
-    private static Span EmptySpan => new(0, 0, 0);
+    private static Position ZeroPosition => new(0, 0, 0, 0);
 
     public static Token[][] P(params Token[][] xs) => xs;
     public static Token[] L(params Token[] xs) => xs;
@@ -39,27 +40,27 @@ public static class R
         return new MemoryStream(byteArray);
     }
 
-    public static Token Ident(string str) => new Identifier(str, EmptySpan);
+    public static Token Ident(string str) => new Identifier(str, ZeroPosition);
 
-    public static Token Cls => new Keyword(KeywordType.Class, EmptySpan);
-    public static Token Method => new Keyword(KeywordType.Method, EmptySpan);
-    public static Token While => new Keyword(KeywordType.While, EmptySpan);
-    public static Token Loop => new Keyword(KeywordType.Loop, EmptySpan);
-    public static Token End => new Keyword(KeywordType.End, EmptySpan);
-    public static Token Is => new Keyword(KeywordType.Is, EmptySpan);
+    public static Token Cls => new Keyword(KeywordType.Class, ZeroPosition);
+    public static Token Method => new Keyword(KeywordType.Method, ZeroPosition);
+    public static Token While => new Keyword(KeywordType.While, ZeroPosition);
+    public static Token Loop => new Keyword(KeywordType.Loop, ZeroPosition);
+    public static Token End => new Keyword(KeywordType.End, ZeroPosition);
+    public static Token Is => new Keyword(KeywordType.Is, ZeroPosition);
 
-    public static Token True => new BooleanLiteral(true, EmptySpan);
-    public static Token False => new BooleanLiteral(false, EmptySpan);
+    public static Token True => new BooleanLiteral(true, ZeroPosition);
+    public static Token False => new BooleanLiteral(false, ZeroPosition);
 
-    public static Token SC => new Symbol(";", SymbolType.Semicolon, EmptySpan);
-    public static Token CM => new Symbol(",", SymbolType.Comma, EmptySpan);
-    public static Token Dot => new Symbol(".", SymbolType.Dot, EmptySpan);
-    public static Token LP => new Symbol("(", SymbolType.LP, EmptySpan);
-    public static Token RP => new Symbol(")", SymbolType.RP, EmptySpan);
+    public static Token SC => new Symbol(";", SymbolType.Semicolon, ZeroPosition);
+    public static Token CM => new Symbol(",", SymbolType.Comma, ZeroPosition);
+    public static Token Dot => new Symbol(".", SymbolType.Dot, ZeroPosition);
+    public static Token LP => new Symbol("(", SymbolType.LP, ZeroPosition);
+    public static Token RP => new Symbol(")", SymbolType.RP, ZeroPosition);
 
 }
 
-public class IntegrTest
+public class IntegerTest
 {
     private readonly BasicLexer lexer = new();
 

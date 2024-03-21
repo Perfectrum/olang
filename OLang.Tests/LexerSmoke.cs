@@ -229,7 +229,7 @@ public class RealTest
     [Fact]
     public void Epsilon()
     {
-        string str = double.Epsilon.ToString("F500");
+        string str = double.Epsilon.ToString("F500", CultureInfo.InvariantCulture);
         byte[] byteArray = Encoding.UTF8.GetBytes(str);
         MemoryStream stream = new MemoryStream(byteArray);
 

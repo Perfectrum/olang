@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text;
 using OLang.Compiler.Lexer.Tokens;
 using OLang.Compiler.Overall;
@@ -231,7 +232,7 @@ internal class BasicLexer : ILexer
 
         var word = GetSavedWord();
         // Потому что в буффере все цифры, поэтому без проверки
-        var number = int.Parse(word);
+        var number = int.Parse(word, CultureInfo.InvariantCulture);
 
         Yield(new Integer(number, GetSpan()));
         return new SwitchParameters(Mode.BASIC);
@@ -264,7 +265,7 @@ internal class BasicLexer : ILexer
         }
 
         var word = GetSavedWord();
-        var number = double.Parse(word);
+        var number = double.Parse(word, CultureInfo.InvariantCulture);
 
         Yield(new Real(number, GetSpan()));
         return new SwitchParameters(Mode.BASIC);

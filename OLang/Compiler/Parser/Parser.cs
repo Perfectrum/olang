@@ -1,10 +1,15 @@
 ﻿using OLang.Compiler.Overall;
+using OLang.Compiler.Parser.Structure;
+using OLang.Compiler.Parser.Structure.Members;
+using OLang.Compiler.Parser.Structure.Members.Implementations;
+using OLang.Compiler.Parser.Structure.Statements;
+using OLang.Compiler.Parser.Structure.Statements.Implementations;
 
 namespace OLang.Compiler.Parser;
 
 internal partial class Parser
 {
-    public Program EndNode => (Program) CurrentSemanticValue;
+    public Structure.Program EndNode => (Structure.Program) CurrentSemanticValue;
 
     #region Lists
 
@@ -29,7 +34,7 @@ internal partial class Parser
 
     #endregion
 
-    private static Program CreateProgram(Position position, Node classes) =>
+    private static Structure.Program CreateProgram(Position position, Node classes) =>
         new(position, ListNodeToList<Class>(classes));
 
     private static Class CreateClass(Position position, Node className, Node? extends, Node members) =>

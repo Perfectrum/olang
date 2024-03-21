@@ -1,4 +1,9 @@
 ﻿using System.Text;
+using OLang.Compiler.Parser.Structure;
+using OLang.Compiler.Parser.Structure.Members;
+using OLang.Compiler.Parser.Structure.Members.Implementations;
+using OLang.Compiler.Parser.Structure.Statements;
+using OLang.Compiler.Parser.Structure.Statements.Implementations;
 
 namespace OLang.Compiler.Parser;
 
@@ -9,7 +14,7 @@ public static class Printer
         private readonly StringBuilder _builder = new();
         private int _tabIndex;
 
-        public string GetProgram(Program program)
+        public string GetProgram(Structure.Program program)
         {
             _builder.Clear();
             _tabIndex = 0;
@@ -17,7 +22,7 @@ public static class Printer
             return _builder.ToString();
         }
 
-        public void Visit(Program program)
+        public void Visit(Structure.Program program)
         {
             Append("Program");
             AppendCollectionWithTab(program.Classes, Visit);
@@ -188,6 +193,6 @@ public static class Printer
         }
     }
     
-    public static void Print(Program program, StreamWriter stream) =>
+    public static void Print(Structure.Program program, StreamWriter stream) =>
         stream.WriteLine(new ConverterAstToCStyleCode().GetProgram(program));
 }

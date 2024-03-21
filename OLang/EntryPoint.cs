@@ -31,8 +31,10 @@ if (parser.Parse() == false)
 }
 else
 {
+    /* 
     outputStream.WriteLine("C style:");
     Printer.Print(parser.EndNode, outputStream);
+    */
     
     outputStream.WriteLine();
     outputStream.WriteLine("Json:");

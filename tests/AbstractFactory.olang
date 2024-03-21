@@ -26,7 +26,7 @@ class AndroidButton extends Widget is
     this() is end
     
     method Render() : Integer is
-        return -1
+        return 1.Neg()
     end
 end
 
@@ -34,7 +34,7 @@ class AndroidTextField extends Widget is
     this() is end
     
     method Render() : Integer is
-        return -2
+        return 2.Neg()
     end
 end
 
@@ -79,14 +79,14 @@ class Program is
         var windowsFactory = WindowsWidgetFactory()
         var androidFactory = AndroidWidgetFactory()
         
-        if this.CheckFactory(windowsFactory, 1).And(this.CheckFactory(androidFactory, -1)).Not() then
+        if this.CheckFactory(windowsFactory, 1).And(this.CheckFactory(androidFactory, 1.Neg())).Not() then
             System.Console.WriteLine("Wrong Answer");
         end
     end
     
     method CheckFactory(factory : WidgetFactory, expectedSign : Integer) : Boolean is
-        var resultButton : factory.CreateButton().Render()
-        var resultTextField : factory.CreateButton().Render()
+        var resultButton = factory.CreateButton().Render()
+        var resultTextField = factory.CreateButton().Render()
         
         return resultButton.Mult(expectedSign).Equal(1).And(resultTextField.Mult(expectedSign).Equal(2))
     end

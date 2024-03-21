@@ -1,38 +1,65 @@
 ﻿class Program is
     this() is
-        let a = 5
-        let b = 54
-        let c = 3213
+        var a = 5
+        var b = 54
+        var c = 3213
         
         if a.Equal(a).Not() then 
             return 
         end
+        
         if c.Equal(c).Not() then 
             return 
         end
              
-        if a.UnaryMinus().Equal(-54).Not() then System.Console.WriteLine("Wrong Answer") end
+        if a.UnaryMinus().Equal(-54).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if a.Plus(b).Equal(59).Not() then System.Console.WriteLine("Wrong Answer") end
+        if a.Plus(b).Equal(59).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if a.Minus(b).Equal(-49).Not() then System.Console.WriteLine("Wrong Answer") end
+        if a.Minus(b).Equal(49.Neg()).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if c.Mult(a).Equal(16065).Not() then System.Console.WriteLine("Wrong Answer") end
+        if c.Mult(a).Equal(16065).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if c.Mult(a).Equal(16065).Not() then System.Console.WriteLine("Wrong Answer") end
+        if c.Mult(a).Equal(16065).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if c.Div(b).Equal(59).Not() then System.Console.WriteLine("Wrong Answer") end
+        if c.Div(b).Equal(59).Not() then 
+            System.Console.WriteLine("Wrong Answer")
+        end
         
-        if b.Rem(a).Equal(4).Not() then System.Console.WriteLine("Wrong Answer") end
+        if b.Rem(a).Equal(4).Not() then 
+            System.Console.WriteLine("Wrong Answer")
+        end
         
-        if a.Less(b).Not() then System.Console.WriteLine("Wrong Answer") end
+        if a.Less(b).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if a.LessEqual(b).Not() then System.Console.WriteLine("Wrong Answer") end
-        if a.LessEqual(5).Not() then System.Console.WriteLine("Wrong Answer") end
+        if a.LessEqual(b).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
+        if a.LessEqual(5).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if b.Greater(a).Not() then System.Console.WriteLine("Wrong Answer") end
+        if b.Greater(a).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
         
-        if b.GreaterEqual(a).Not() then System.Console.WriteLine("Wrong Answer") end
-        if b.GreaterEqual(54).Not() then System.Console.WriteLine("Wrong Answer") end
+        if b.GreaterEqual(a).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
+        if b.GreaterEqual(54).Not() then 
+            System.Console.WriteLine("Wrong Answer") 
+        end
     end
 end

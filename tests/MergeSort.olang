@@ -1,20 +1,20 @@
 ﻿class Random is
-	field a = 45
-	field c = 21
-	field m = 67
-	field seed = 2
+	field a:Integer is 45
+	field c:Integer is 21
+	field m:Integer is 67
+	field seed:Integer is 2
 
 	this(startSeed : Integer) is
 		seed = startSeed
 	end
 
-    method Next : Integer is
+    method Next() : Integer is
 		seed = this.a.Mull(this.seed).Add(this.c).Mod(this.m)
 		return this.seed
 	end
 	
 	method FillRandomNumbers(array : Array[Integer]) is
-        let i = 0
+        var i = 0
         while i.Less(array.Length) loop
             array.Set(i, random.Next())
             i = i.Plus(1)
@@ -25,7 +25,7 @@ end
 class Program is
 	this(seed : Integer) is
 		var array : Array[Integer] = Array(10)
-		var random : Random(seed) = Random()
+		var random : Random = Random(seed)
 		random.FillRandomNumbers(array)
 
 		this.Sort(array)
@@ -49,10 +49,10 @@ class Program is
 	end
 	
 	method Merge(array : Array[Integer], lowIndex : Integer, midIndex : Integer, highIndex : Integer) is
-	    let left = lowIndex
-		let right = midIndex.Add(1)
-	    let tempArray:Array[Integer] = Array(highIndex.Minus(lowIndex).Add(1))
-	    let index = 0
+	    var left = lowIndex
+		var right = midIndex.Add(1)
+	    var tempArray:Array[Integer] = Array(highIndex.Minus(lowIndex).Add(1))
+	    var index = 0
 	    
 	    while left.LessEqual(midIndex).And(right.LessEqual(highIndex)) loop
 	        if array.Get(left).Less(array.Get(right)) then
@@ -66,7 +66,7 @@ class Program is
 	        index = index.Plus(1)
 	    end
 	    
-	    let tempIndex = left
+	    var tempIndex = left
 	    while tempIndex.LessEqual(midIndex) loop
 	        tempArray.Set(index, array.Get(tempIndex)) 
 	        tempIndex = tempIndex.Plus(1)
@@ -88,7 +88,7 @@ class Program is
 	end
 
 	method CheckSorting(array : Array[Integer]) : Boolean is
-        let i = 1
+        var i = 1
         while i.Less(array.Length) loop
             if array.Get(i.Dec()).Greater(array.Get(i)) then
                 return false

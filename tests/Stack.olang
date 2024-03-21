@@ -11,7 +11,7 @@
     
     method Pop() : Integer is
         size.Minus(1)
-        let element = list.head()
+        var element = list.head()
         list = list.head()
         return element
     end
@@ -23,13 +23,13 @@ end
 
 class Program is
     this() is
-        let array:Array[Integer] = Array()
+        var array:Array[Integer] = Array()
         array.Set(0, 3)
         array.Set(1, 1)
         array.Set(2, 2)
     
-        let stack = Stack()
-        let i = 0
+        var stack = Stack()
+        var i = 0
         while i.Less(v) loop
             stack.Push(array.Get(i))
             i = i.Plus(1)
@@ -37,7 +37,7 @@ class Program is
         
         i = 0
         while i.Less(v) loop
-            let expectedElement = array.Get(i)
+            var expectedElement = array.Get(i)
             
             if stack.Peek().Equal(expectedElement).Not() then 
                 System.Console.WriteLine("Wrong Answer") 

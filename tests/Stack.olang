@@ -1,18 +1,18 @@
 ﻿class Stack is
-    var size : 0
-    var list : List[Integer]()
+    field size:Integer is 0
+    field list:List[Integer] is List()
     
     this() is end
     
     method Push(element : Integer) is
-        list := list.Append(element)
+        list = list.Append(element)
         size.Plus(1)
     end
     
     method Pop() : Integer is
         size.Minus(1)
-        var element : list.head()
-        list := list.head()
+        let element = list.head()
+        list = list.head()
         return element
     end
     
@@ -23,29 +23,35 @@ end
 
 class Program is
     this() is
-        var array : Array[Integer]()
+        let array:Array[Integer] = Array()
         array.Set(0, 3)
         array.Set(1, 1)
         array.Set(2, 2)
     
-        var stack = Stack()
-        var i : 0
+        let stack = Stack()
+        let i = 0
         while i.Less(v) loop
             stack.Push(array.Get(i))
-            i := i.Plus(1)
+            i = i.Plus(1)
         end
         
-        i := 0
+        i = 0
         while i.Less(v) loop
-            var expectedElement : array.Get(i)
+            let expectedElement = array.Get(i)
             
-            if stack.Peek().Equal(expectedElement).Not() then System.Console.WriteLine("Wrong Answer") end
+            if stack.Peek().Equal(expectedElement).Not() then 
+                System.Console.WriteLine("Wrong Answer") 
+            end
             
-            if stack.Pop().Equal(expectedElement).Not() then System.Console.WriteLine("Wrong Answer") end
+            if stack.Pop().Equal(expectedElement).Not() then 
+                System.Console.WriteLine("Wrong Answer") 
+            end
             
-            if stack.size.Equal(array.Length.Minus(i + 1)).Not() then System.Console.WriteLine("Wrong Answer") end
+            if stack.size.Equal(array.Length.Minus(i.Add(1))).Not() then 
+                System.Console.WriteLine("Wrong Answer") 
+            end
             
-            i := i.Plus(1)
+            i = i.Plus(1)
         end
     end
 end

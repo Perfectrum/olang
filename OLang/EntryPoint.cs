@@ -1,13 +1,15 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OLang.Compiler.Lexer;
 using OLang.Compiler.Parser;
-using DotNetGraph.Attributes;
-using DotNetGraph.Core;
-using DotNetGraph.Extensions;
 using DotNetGraph.Compilation;
 
-Console.WriteLine("Enter absolute path to the test .olang file");
-var pathToSourceCode = Console.ReadLine();
+if (args.Length == 0) 
+{
+    Console.WriteLine("Enter absolute path to the test .olang file");
+    return;
+}
+
+var pathToSourceCode = args[0];
 
 if (File.Exists(pathToSourceCode) == false)
 {

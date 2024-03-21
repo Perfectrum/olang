@@ -1,13 +1,13 @@
 
 class A is
-    this(x:Integer) is
+    this (x:Integer) is
         System.Console.WriteLine("A")
     end
 end
 
 class B extends A is
     this() is
-        super(5)
+        Inheritance.Super(5)
         System.Console.WriteLine("B")
     end
 end

@@ -1,6 +1,6 @@
 ﻿class Program is
     this() is
-        var array : Array[Real](5)
+        var array : Array[Real] = Array()
         array.Set(0, 1.5)
         array.Set(1, 2.3)
         array.Set(2, 3.6)

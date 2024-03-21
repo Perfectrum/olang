@@ -1,11 +1,15 @@
 ﻿class Program is
     this() is
-        var a : 5
-        var b : 54
-        var c : 3213
+        let a = 5
+        let b = 54
+        let c = 3213
         
-        if a.Equal(a).Not() then return end
-        if c.Equal(c).Not() then return end
+        if a.Equal(a).Not() then 
+            return 
+        end
+        if c.Equal(c).Not() then 
+            return 
+        end
              
         if a.UnaryMinus().Equal(-54).Not() then System.Console.WriteLine("Wrong Answer") end
         

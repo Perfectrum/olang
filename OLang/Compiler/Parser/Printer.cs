@@ -28,8 +28,11 @@ public static class Printer
             AppendCollectionWithTab(program.Classes, Visit);
         }
 
-        public void Visit(Parameter parameter) =>
-            Append($"{parameter.Type} {parameter.Name}");
+        public void Visit(Parameter parameter)
+        {
+            Visit(parameter.Type);
+            Append($" {parameter.Name}");
+        }
 
         public void Visit(Field field)
         {
@@ -39,7 +42,7 @@ public static class Printer
             else
                 Visit(field.Type);
             
-            Append($"{field.Name} = ");
+            Append($" {field.Name} = ");
             field.Expression.Accept(this);
         }
 
@@ -47,14 +50,31 @@ public static class Printer
         {
             Append("this ");
             AppendCollectionWithoutTab(constructor.Parameters, Visit);
+            if (constructor.LocalConstructorInvocation is not null)
+            {
+                var localConstructorIdentifier = constructor.LocalConstructorInvocation.ConstructorType switch
+                {
+                    LocalConstructorIdentifierType.This => "this",
+                    LocalConstructorIdentifierType.Base => "base",
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                
+                Append($" : {localConstructorIdentifier}");
+                AppendCollectionWithoutTab(constructor.LocalConstructorInvocation.Arguments, node => node.Accept(this));
+            }
             AppendCollectionWithTab(constructor.Body, node => node.Accept(this));
         }
 
         public void Visit(Method method)
         {
-            Append($"{(method.IsStatic ? "static" : "")} method {method.Name}, ");
-            AppendCollectionWithTab(method.Body, node => node.Accept(this));
+            Append($"{(method.IsStatic ? "static " : "")}");
+            if (method.ReturnType != null)
+                Visit(method.ReturnType);
+            else
+                Append("void");
+            Append($" {method.Name}");
             AppendCollectionWithoutTab(method.Parameters, Visit);
+            AppendCollectionWithTab(method.Body, node => node.Accept(this));
         }
 
         public void Visit(Class @class)
@@ -81,6 +101,16 @@ public static class Printer
             Append("]");
         }
 
+        public void Visit(BooleanNode booleanNode) => Append(booleanNode.Value.ToString());
+
+        public void Visit(StringLiteralNode stringLiteralNode) => Append($"\"{stringLiteralNode.Value}\"");
+
+        public void Visit(RealNode realNode) => Append(realNode.Value.ToString());
+
+        public void Visit(IntegerNode integerNode) => Append(integerNode.Value.ToString());
+
+        public void Visit(IdentifierNode identifierNode) => Append(identifierNode.Value);
+
         public void Visit(IfStatement ifStatement)
         {
             Append("if (");
@@ -106,9 +136,12 @@ public static class Printer
             variable.Expression.Accept(this);
         }
 
+        public void Visit(ThisNode thisNode) => Append("this");
+
         public void Visit(Assigment assigment)
         {
-            Append($"{assigment.VariableName} = ");
+            assigment.AssignmentValue.Accept(this);
+            Append(" = ");
             assigment.Expression.Accept(this);
         }
 
@@ -148,8 +181,6 @@ public static class Printer
             valueGetting.Expression.Accept(this);
             Append($".{valueGetting.FieldName}");
         }
-
-        public void Visit<T>(ValueNode<T> valueNode) => Append(valueNode.Value!.ToString());
 
         private void AppendCollectionWithTab<T>(
             IEnumerable<T> collection, Action<T> actionOnNode) where T : Node
@@ -193,6 +224,6 @@ public static class Printer
         }
     }
     
-    public static void Print(Structure.Program program, StreamWriter stream) =>
+    public static void PrintCStyle(Structure.Program program, StreamWriter stream) =>
         stream.WriteLine(new ConverterAstToCStyleCode().GetProgram(program));
 }

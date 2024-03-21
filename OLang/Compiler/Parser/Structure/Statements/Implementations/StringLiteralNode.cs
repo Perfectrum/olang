@@ -2,12 +2,12 @@
 
 namespace OLang.Compiler.Parser.Structure.Statements.Implementations;
 
-public class ValueNode<T>(
+public class StringLiteralNode(
     Position position,
-    T value
+    string value
 ) : Expression(position)
 {
-    public T Value { get; } = value;
-    
+    public string Value { get; } = value;
+        
     public override void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }

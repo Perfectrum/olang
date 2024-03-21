@@ -13,6 +13,7 @@
 %tokentype TokenType
 
 %using OLang.Compiler.Overall
+%using OLang.Compiler.Parser.Structure
 
 %YYSTYPE Node
 %YYLTYPE Position
@@ -21,8 +22,9 @@
 
 %token CLASS
 %token EXTENDS
-%token LET
+%token VAR
 %token THIS
+%token BASE
 %token METHOD
 %token IS
 %token END
@@ -42,11 +44,11 @@
 %token RBRACKET
 %token DOT
 %token ASAN
+%token USING
 
 %token FIELD
 %token STATIC
 %token FUNCTION
-%token SUPER
 
 %token INTEGER
 %token REAL
@@ -80,12 +82,16 @@ MemberDeclarations
     ;
 
 ClassName
-    : IDENTIFIER GenericParameter { $$ = CreateClassName(@$, $1, $2); }
+    : IDENTIFIER PossibleGenericParameter { $$ = CreateClassName(@$, $1, $2); }
+    ;
+    
+PossibleGenericParameter
+    : { $$ = null; }
+    | GenericParameter { $$ = $1; }
     ;
     
 GenericParameter
-    : { $$ = null; }
-    | LBRACKET ClassName RBRACKET { $$ = $2; }
+    : LBRACKET ClassName RBRACKET { $$ = $2; }
     ;
 
 MemberDeclaration
@@ -105,7 +111,17 @@ StaticDeclaration
     ;
 
 ConstructorDeclaration
-    : THIS LPARENT Parameters RPARENT IS Body END { $$ = CreateConstructor(@$, $3, $6); }
+    : THIS LPARENT Parameters RPARENT LocalConstructorInvocation IS Body END { $$ = CreateConstructor(@$, $3, $5, $7); }
+    ;
+
+LocalConstructorInvocation
+    : { $$ = null; }
+    | USING LocalConstructorIdentifier LPARENT Arguments RPARENT { $$ = CreateLocalConstructorInvocation(@$, $2, $4); }
+    ;
+
+LocalConstructorIdentifier
+    : THIS
+    | BASE
     ;
 
 MethodDeclaration
@@ -131,7 +147,7 @@ Body
     ;
 
 VariableDeclaration
-    : LET IDENTIFIER SpecifyingType ASAN Expression { $$ = CreateVariable(@$, $2, $3, $5); }
+    : VAR IDENTIFIER SpecifyingType ASAN Expression { $$ = CreateVariable(@$, $2, $3, $5); }
     ;
 
 SpecifyingType
@@ -154,7 +170,12 @@ Statement
     ;
 
 Assignment
-    : IDENTIFIER ASAN Expression { $$ = CreateAssigment(@$, $1, $3); }
+    : AssigmentPrefix ASAN Expression { $$ = CreateAssigment(@$, $1, $3); }
+    ;
+
+AssigmentPrefix
+    : ValueGetting
+    | IDENTIFIER
     ;
 
 WhileLoop
@@ -205,9 +226,17 @@ Primary
     | REAL
     | BOOLEAN
     | STRING
-    | THIS
-    | ClassName
-    | SUPER
+    | ThisStatement
+    | ClassOrVariableExpression
+    ;
+
+ThisStatement
+    : THIS { $$ = CreateThisNode(@$, $1); }
+    ;
+
+ClassOrVariableExpression
+    : IDENTIFIER { $$ = $1; }
+    | IDENTIFIER GenericParameter { $$ = CreateClassName(@$, $1, $2); }
     ;
 
 %%

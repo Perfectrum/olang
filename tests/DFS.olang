@@ -4,17 +4,17 @@
     this() is end
     
     method AddEdge(to : Integer) is
-        neighbours = this.neighbours.Append(to)
+        this.neighbours = this.neighbours.Append(to)
     end
 end
 
 class Graph is
-    field vertices:Integer is 0
+    field vertices : Integer is 0
     field adjacencyList : Array[Vertex] is Array(0)
     
     this(v : Integer) is
-        vertices = v
-        adjacencyList = Array(v)
+        this.vertices = v
+        this.adjacencyList = Array(v)
         var i = 0
         while i.Less(v) loop
             this.adjacencyList.Set(i, Vertex())

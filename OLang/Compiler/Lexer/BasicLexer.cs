@@ -15,12 +15,13 @@ internal class BasicLexer : ILexer
     {
         ["class"] = KeywordType.Class,
         ["static"] = KeywordType.Static,
-        ["super"] = KeywordType.Super,
+        ["this"] = KeywordType.This,
+        ["base"] = KeywordType.Base,
+        ["using"] = KeywordType.Using,
         ["field"] = KeywordType.Field,
         ["function"] = KeywordType.Function,
         ["extends"] = KeywordType.Extends,
         ["var"] = KeywordType.Var,
-        ["this"] = KeywordType.This,
         ["method"] = KeywordType.Method,
         ["is"] = KeywordType.Is,
         ["end"] = KeywordType.End,
@@ -45,7 +46,7 @@ internal class BasicLexer : ILexer
         WORD
     }
 
-    private record Location(int Column, int Line, int Offset);
+    private record struct Location(int Column, int Line, int Offset);
     private record struct SwitchParameters(Mode Mode, bool Delay = true, bool Push = true);
 
     ///////////////////////////////////////////////////////////
@@ -61,13 +62,18 @@ internal class BasicLexer : ILexer
     private int _column = 1;
     private int _line = 1;
     private int _offset = 0;
+    private string _pathToSourceFile = "";
 
     ///////////////////////////////////////////////////////////
     // Helpers
 
     private char Current => _currentChar;
 
-    private Position CurrentPosition => new(_line, _line, _column, _column + 1);
+    private Position CurrentPosition => new(
+        _line, _line,
+        _column, _column + 1,
+        _pathToSourceFile
+    );
 
     private void Switch(SwitchParameters parameters)
     {
@@ -107,9 +113,12 @@ internal class BasicLexer : ILexer
 
     private Position GetSpan(int endFix = 0, int startFix = 0)
     {
-
         var loc = GetLastLocation();
-        return new Position(_line, _line, (loc?.Column ?? 0) + startFix, _column + endFix);
+        return new Position(
+            _line, _line,
+            loc.Column + startFix, _column + endFix,
+            _pathToSourceFile
+        );
     }
 
     ///////////////////////////////////////////////////////////
@@ -130,9 +139,10 @@ internal class BasicLexer : ILexer
     ///////////////////////////////////////////////////////////
     // EntryPoint
 
-    public IEnumerable<Token> Feed(Stream sourceFile)
+    public IEnumerable<Token> Feed(Stream stream, string pathToSourceFile = "")
     {
-        TextReader reader = new StreamReader(sourceFile);
+        _pathToSourceFile = pathToSourceFile;
+        TextReader reader = new StreamReader(stream);
 
         int ch = reader.Read();
         _delayCurrentSymbol = true;

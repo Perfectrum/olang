@@ -29,7 +29,7 @@ public static class Comparator
 public static class R
 {
 
-    private static Position ZeroPosition => new(0, 0, 0, 0);
+    private static Position ZeroPosition => new(0, 0, 0, 0, "");
 
     public static Token[][] P(params Token[][] xs) => xs;
     public static Token[] L(params Token[] xs) => xs;

@@ -4,6 +4,7 @@ using DotNetGraph.Attributes;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
 using DotNetGraph.Compilation;
+using OLang.Compiler.Parser.Structure;
 using OLang.Compiler.Parser.Structure.Members;
 using OLang.Compiler.Parser.Structure.Members.Implementations;
 using OLang.Compiler.Parser.Structure.Statements;
@@ -134,7 +135,7 @@ class DotGraphBuilder
 
         var node = new DotNode()
                         .WithIdentifier(method.GetHashCode().ToString())
-                        .WithLabel(method.ToString());
+                        .WithLabel(method.Name);
         graph.Add(node);
 
         foreach(var statement in method.Body)
@@ -196,14 +197,32 @@ class DotGraphBuilder
         var node = expr switch
         {
             ConstructorInvocation ci => AddConstructorInvocation(ci),
+            IfStatement ifStatement => AddIfStatement(ifStatement),
             MethodCall mc => AddMethodCall(mc),
             ValueGetting vg => AddValueGetting(vg),
             ClassName cn => AddClassName(cn),
-            Expression e => new DotNode().WithIdentifier($"{e.GetHashCode()}").WithLabel("???") // throw new Exception($"Undefined expression {expr}")
+            // TODO: написать реализацию (а лучше вообще всё переписать на визиторы нормально)
+            BooleanNode booleanNode => AddValueNode(booleanNode, booleanNode.Value),
+            IntegerNode integerNode => AddValueNode(integerNode, integerNode.Value),
+            RealNode realNode => AddValueNode(realNode, realNode.Value),
+            StringLiteralNode stringLiteralNode => AddValueNode(stringLiteralNode, stringLiteralNode.Value),
+            IdentifierNode identifierNode => AddValueNode(identifierNode, identifierNode.Value),
+            _ => throw new ArgumentOutOfRangeException(nameof(expr), expr, null)
         };
 
         graph.Add(node);
         return node;
+    }
+    
+    // TODO: пока просто костыль
+    private DotNode AddValueNode<T>(Node node, T value)
+    {
+        if (value == null)
+            throw new ArgumentNullException(nameof(value));
+
+        return new DotNode()
+            .WithIdentifier(node.GetHashCode().ToString())
+            .WithLabel(value.ToString());
     }
 
     public DotNode AddConstructorInvocation(ConstructorInvocation expr)
@@ -242,9 +261,12 @@ class DotGraphBuilder
 
     public DotNode AddClassName(ClassName expr)
     {
+        if (expr.GenericArgument != null)
+            graph.Add(AddClassName(expr.GenericArgument));
+        
         var node = new DotNode()
-                        .WithIdentifier($"Class Name {expr.Name}")
-                        .WithLabel($"Class Name {expr.Name}");
+                        .WithIdentifier($"Class Name: {expr.Name}")
+                        .WithLabel($"Class Name: {expr.Name}");
         graph.Add(node);
         return node;
     }
@@ -325,9 +347,12 @@ class DotGraphBuilder
     {
         var node = new DotNode()
                         .WithIdentifier($"{a.GetHashCode()}")
-                        .WithLabel($"{a.VariableName} =");
+                        .WithLabel(" = ");
         graph.Add(node);
-
+        
+        var valueGetting = AddExpression(a.AssignmentValue);
+        graph.Add(new DotEdge().From(node).To(valueGetting));
+        
         var expr = AddExpression(a.Expression);
         graph.Add(new DotEdge().From(node).To(expr));
 

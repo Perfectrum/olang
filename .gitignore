@@ -12,3 +12,12 @@ _UpgradeReport_Files/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# GPPG
+**/Parser.Generated.cs
+**/GrammarYaac.*
+!**/GrammarYaac.y
+
+# Output files
+**/graph.dot
+**/output.json

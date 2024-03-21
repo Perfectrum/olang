@@ -6,12 +6,13 @@ public record struct Position(
     long BeginLine,
     long EndLine,
     int BeginColumn,
-    int EndColumn
+    int EndColumn,
+    string Filename
 ) : IMerge<Position>
 {
     public Position Merge(Position last) =>
-        new Position(BeginLine, last.EndLine, BeginColumn, last.EndColumn);
+        new Position(BeginLine, last.EndLine, BeginColumn, last.EndColumn, Filename);
 
     public override string ToString() =>
-        $"{BeginLine}-{EndLine}:{BeginLine}-{EndColumn}";
+        $"{Filename}:{BeginLine}-{EndLine}:{BeginColumn}-{EndColumn}";
 };

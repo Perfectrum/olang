@@ -6,8 +6,7 @@ class A is
 end
 
 class B extends A is
-    this() is
-        Inheritance.Super(5)
+    this() using base(5) is
         System.Console.WriteLine("B")
     end
 end

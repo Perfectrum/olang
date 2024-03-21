@@ -19,7 +19,7 @@ if (File.Exists(pathToSourceCode) == false)
 
 using var sourceFile = File.OpenRead(pathToSourceCode);
 var lex = new SuperLexer();
-var tokensStream = lex.Feed(sourceFile);
+var tokensStream = lex.Feed(sourceFile, pathToSourceCode);
 
 using var errorStream = new StreamWriter(Console.OpenStandardError());
 using var outputStream = new StreamWriter(Console.OpenStandardOutput());
@@ -31,16 +31,10 @@ if (parser.Parse() == false)
 }
 else
 {
-    /* 
-    outputStream.WriteLine("C style:");
-    Printer.Print(parser.EndNode, outputStream);
-    */
+    Printer.PrintCStyle(parser.EndNode, outputStream);
     
-    outputStream.WriteLine();
-    outputStream.WriteLine("Json:");
-    var json = JsonConvert.SerializeObject(parser.EndNode, Formatting.Indented);
-    outputStream.WriteLine(json);
-
+    // var json = JsonConvert.SerializeObject(parser.EndNode, Formatting.Indented);
+    // File.WriteAllText("output.json", json);
 
     var graphBuilder = new DotGraphBuilder();
 
@@ -53,4 +47,3 @@ else
     var result = writer.GetStringBuilder().ToString();
     File.WriteAllText("graph.dot", result);
 }
-

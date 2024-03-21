@@ -50,7 +50,7 @@ internal class SuperLexer : ILexer
 
     private static Position MakeSpanAfter(Position? span)
     {
-        return span ?? new Position(0, 0, 0, 0);
+        return span ?? new Position(0, 0, 0, 0, "");
     }
 
     private static bool ShouldNotAddSemicolonAfterToken(Token? token)
@@ -76,11 +76,12 @@ internal class SuperLexer : ILexer
     }
 
     private readonly BasicLexer _basic = new();
-    public IEnumerable<Token> Feed(Stream sourceFile)
+
+    public IEnumerable<Token> Feed(Stream stream, string pathToSourceFile = "")
     {
         Token? prev = null;
 
-        var iter = _basic.Feed(sourceFile).GetEnumerator();
+        var iter = _basic.Feed(stream, pathToSourceFile).GetEnumerator();
         bool hadNewLine = false;
         while (iter.MoveNext())
         {

@@ -25,7 +25,8 @@ public enum KeywordType
 
     Var,
     This,
-    Super,
+    Base,
+    Using,
 
     Method,
     Is,

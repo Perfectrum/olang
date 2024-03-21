@@ -4,6 +4,10 @@ using DotNetGraph.Attributes;
 using DotNetGraph.Core;
 using DotNetGraph.Extensions;
 using DotNetGraph.Compilation;
+using OLang.Compiler.Parser.Structure.Members;
+using OLang.Compiler.Parser.Structure.Members.Implementations;
+using OLang.Compiler.Parser.Structure.Statements;
+using OLang.Compiler.Parser.Structure.Statements.Implementations;
 
 namespace OLang.Compiler.Parser;
 
@@ -11,7 +15,7 @@ class DotGraphBuilder
 {
     public DotGraph graph = new DotGraph().WithIdentifier("program graph").Directed();
 
-    public void AddProgram(Program program)
+    public void AddProgram(Structure.Program program)
     {
         var node = new DotNode().WithIdentifier("Program").WithLabel("Program");
         graph.Add(node);

@@ -7,7 +7,7 @@ end
 
 class B extends A is
     this() is
-        super(5)
+        A.Super(5)
         System.Console.WriteLine("B")
     end
 end

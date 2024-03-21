@@ -118,7 +118,8 @@ FunctionDeclaration
 
 Parameters
     : { $$ = CreateNewList(@$); }
-    | Parameters COMMA ParameterDeclaration { AddToList(@$, $$, $2); $$ = $1; }
+    | ParameterDeclaration { $$ = CreateNewList(@$, $1); }
+    | Parameters COMMA ParameterDeclaration { AddToList(@$, $$, $3); $$ = $1; }
     ;
 
 ParameterDeclaration
